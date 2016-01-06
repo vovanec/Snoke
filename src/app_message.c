@@ -1,6 +1,7 @@
 #include <pebble.h>
 
-Window *window;	
+#include "ui.h"
+
 	
 // Key values for AppMessage Dictionary
 enum {
@@ -42,10 +43,9 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 }
 
 void init(void) {
-	window = window_create();
-	window_stack_push(window, true);
 	
 	// Register AppMessage handlers
+    /*
 	app_message_register_inbox_received(in_received_handler); 
 	app_message_register_inbox_dropped(in_dropped_handler); 
 	app_message_register_outbox_failed(out_failed_handler);
@@ -53,11 +53,14 @@ void init(void) {
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
 	send_message();
+    */
+    show_ui();    
 }
 
 void deinit(void) {
-	app_message_deregister_callbacks();
-	window_destroy(window);
+    
+	//app_message_deregister_callbacks();
+    hide_ui();
 }
 
 int main( void ) {
