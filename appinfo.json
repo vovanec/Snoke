@@ -21,15 +21,6 @@
             {
                 "file": "images/snoke_bitmap.png",
                 "menuIcon": true,
-                "name": "SNOKE_BITMAP_2",
-                "targetPlatforms": [
-                    "aplite"
-                ],
-                "type": "bitmap"
-            },
-            {
-                "file": "images/snoke_bitmap.png",
-                "menuIcon": true,
                 "name": "SNOKE_BITMAP",
                 "targetPlatforms": [
                     "aplite"
