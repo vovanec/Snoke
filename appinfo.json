@@ -1,0 +1,25 @@
+{
+    "appKeys": {
+        "message": 1,
+        "status": 0
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "vovanec@gmail.com",
+    "longName": "Snoke Watchface",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "Snoke Watchface",
+    "targetPlatforms": [
+        "aplite"
+    ],
+    "uuid": "084bae0b-867a-403d-802a-939df14b7f29",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
