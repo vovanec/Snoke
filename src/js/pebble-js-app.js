@@ -59,10 +59,12 @@ Pebble.addEventListener("appmessage",
 							function(e) {
 								console.log("Received app message: " + JSON.stringify(e));
                 var msg_type = e.payload.message_type;
+                
                 if (msg_type === MSG_TYPE_STOCKS) {
                   getStocksInfo(function(resp) {
     								sendMessage(0, MSG_TYPE_STOCKS, resp);                   
                   });
+                  
                 } else {
                   console.log('Error: unknown message type received: ' + msg_type);
                 }
