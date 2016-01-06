@@ -10,7 +10,24 @@
     "longName": "Snoke Watchface",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "images/snoke_bitmap.png",
+                "name": "SNOKE_BITMAP_2",
+                "targetPlatforms": [
+                    "aplite"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/snoke_bitmap.png",
+                "name": "SNOKE_BITMAP",
+                "targetPlatforms": [
+                    "aplite"
+                ],
+                "type": "bitmap"
+            }
+        ]
     },
     "sdkVersion": "3",
     "shortName": "Snoke Watchface",
