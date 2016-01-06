@@ -5,13 +5,14 @@
 	
 // Key values for AppMessage Dictionary
 enum {
-	STATUS_KEY = 0,	
-	MESSAGE_KEY = 1
+	STATUS_KEY = 0,
+	MESSAGE_TYPE_KEY = 1,
+	MESSAGE_KEY = 2
 };
 
 enum {
-  GET_STOCKS = 0,
-  GET_WEATHER = 1
+  MSG_TYPE_STOCKS = 0,
+  MSG_TYPE_WEATHER = 1
 };
 
 enum {
@@ -20,12 +21,12 @@ enum {
 };
 
 // Write message to buffer & send
-void send_message(void){
+void query_backend(int message_type){
 	DictionaryIterator *iter;
 	
 	app_message_outbox_begin(&iter);
 	dict_write_uint8(iter, STATUS_KEY, STATUS_OK);
-	dict_write_uint8(iter, MESSAGE_KEY, GET_STOCKS);  
+	dict_write_uint8(iter, MESSAGE_TYPE_KEY, message_type);
 	dict_write_end(iter);
   
   app_message_outbox_send();
@@ -36,18 +37,48 @@ void send_message(void){
 // Called when a message is received from PebbleKitJS
 static void in_received_handler(DictionaryIterator *received, void *context) {
 	Tuple *tuple;
+  int status;
+  int message_type;
+  char* message;
 	
 	tuple = dict_find(received, STATUS_KEY);
-	if(tuple) {
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Status: %d", (int)tuple->value->uint32); 
-	}
-	
+	if(!tuple) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract status code from backend response.");
+    return;
+  }
+  status = (int)tuple->value->uint32;
+  
+	tuple = dict_find(received, MESSAGE_TYPE_KEY);
+	if(!tuple) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message type from backend response.");
+    return;
+  }
+  message_type = (int)tuple->value->uint32;
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message Type: %d", message_type);   
+
 	tuple = dict_find(received, MESSAGE_KEY);
-	if(tuple) {
-    char* stock_price = tuple->value->cstring;
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message: %s", stock_price);
-    set_stock_price(stock_price);
-	}}
+	if(!tuple) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message from backend response.");
+    return;
+  }
+  message = tuple->value->cstring;    
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message: %s", message);
+  
+  if (status != STATUS_OK) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s\n", status, message);
+    return;
+  }
+  
+  switch(message_type) {
+    case MSG_TYPE_STOCKS:
+      set_stock_price(message);    
+      break;
+    case MSG_TYPE_WEATHER:
+      break;
+    default:
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %d.\n", message_type);
+  }
+}
 
 // Called when an incoming message from PebbleKitJS is dropped
 static void in_dropped_handler(AppMessageResult reason, void *context) {	
@@ -59,9 +90,17 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+  
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
+  if (tick_time->tm_min != 0) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying for stock info update.");
+    query_backend(MSG_TYPE_STOCKS);
+  }
   set_time(tick_time);
-  send_message();
+}
+
+static void update_battery(BatteryChargeState charge_state) {
+  set_battery_percent(charge_state.charge_percent);
 }
 
 void init(void) {
@@ -75,8 +114,9 @@ void init(void) {
 		
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
   
-  tick_timer_service_subscribe(HOUR_UNIT, handle_tick);
-	
+  tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+  update_battery(battery_state_service_peek());
+  battery_state_service_subscribe(&update_battery);  
 }
 
 void deinit(void) {

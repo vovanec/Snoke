@@ -1,6 +1,7 @@
 {
     "appKeys": {
-        "message": 1,
+        "message": 2,
+        "message_type": 1,
         "status": 0
     },
     "capabilities": [
@@ -12,7 +13,14 @@
     "resources": {
         "media": [
             {
+                "file": "images/icon_battery.png",
+                "name": "ICON_BATTERY",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/snoke_bitmap.png",
+                "menuIcon": true,
                 "name": "SNOKE_BITMAP_2",
                 "targetPlatforms": [
                     "aplite"
@@ -21,6 +29,7 @@
             },
             {
                 "file": "images/snoke_bitmap.png",
+                "menuIcon": true,
                 "name": "SNOKE_BITMAP",
                 "targetPlatforms": [
                     "aplite"

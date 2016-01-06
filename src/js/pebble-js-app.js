@@ -1,6 +1,8 @@
 // Function to send a message to the Pebble using AppMessage API
-function sendMessage(status, message) {
-  Pebble.sendAppMessage({'status': status, 'message': message});
+function sendMessage(status, message_type, message) {
+  Pebble.sendAppMessage({'status': status,
+                         'message_type': message_type,
+                         'message': message});
 	
 	// PRO TIP: If you are sending more than one message, or a complex set of messages, 
 	// it is important that you setup an ackHandler and a nackHandler and call 
@@ -9,13 +11,6 @@ function sendMessage(status, message) {
 	// ack-ing or nack-ing the message you just sent. The specified nackHandler will 
 	// also be called if your message send attempt times out.
 }
-
-
-// Called when JS is ready
-Pebble.addEventListener("ready",
-							function(e) {
-                console.log("JS is ready!!!");
-							});
 
 var MSG_TYPE_STOCKS = 0;
 
@@ -42,6 +37,8 @@ var queryWeb = function (url, on_success, on_error) {
 
 
 var getStocksInfo = function (callback) {
+  console.log('Querying for latest stock prices.');
+  
   queryWeb('http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price',
           function(resp){
             console.log('Received service response: ' + JSON.stringify(resp));
@@ -56,14 +53,29 @@ var getStocksInfo = function (callback) {
           });
 };
 
+
 // Called when incoming message from the Pebble is received
 Pebble.addEventListener("appmessage",
 							function(e) {
 								console.log("Received app message: " + JSON.stringify(e));
-                var msg_type = e.payload.message;
+                var msg_type = e.payload.message_type;
                 if (msg_type === MSG_TYPE_STOCKS) {
                   getStocksInfo(function(resp) {
-    								sendMessage(0, resp);                   
+    								sendMessage(0, MSG_TYPE_STOCKS, resp);                   
                   });
+                } else {
+                  console.log('Error: unknown message type received: ' + msg_type);
                 }
+							});
+
+
+// Called when JS is ready
+Pebble.addEventListener("ready",
+							function(e) {
+                console.log("JS is ready!!!");
+                
+                getStocksInfo(function(resp) {
+                  sendMessage(0, MSG_TYPE_STOCKS, resp);                   
+                });                
+                
 							});

@@ -2,6 +2,7 @@
 #include "ui.h"
 
 static GBitmap* s_snoke_bitmap;
+static GBitmap* s_battery_icon_bitmap;
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -11,6 +12,8 @@ static BitmapLayer *s_bitmaplayer;
 static TextLayer *s_stocks_label;
 static TextLayer *s_stocks;
 static TextLayer *s_time;
+static BitmapLayer *s_battery_icon;
+static TextLayer *s_battery_percent;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -37,7 +40,7 @@ static void initialise_ui(void) {
   s_stocks = text_layer_create(GRect(111, 152, 32, 16));
   text_layer_set_background_color(s_stocks, GColorClear);
   text_layer_set_text_color(s_stocks, GColorWhite);
-  text_layer_set_text(s_stocks, "Text layer");
+  text_layer_set_text(s_stocks, "    ");
   text_layer_set_text_alignment(s_stocks, GTextAlignmentRight);
   text_layer_set_font(s_stocks, s_res_gothic_14);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stocks);
@@ -49,6 +52,19 @@ static void initialise_ui(void) {
   text_layer_set_text(s_time, "00:00");
   text_layer_set_font(s_time, s_res_gothic_24);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_time);
+  
+  // s_battery_icon
+  s_battery_icon = bitmap_layer_create(GRect(126, 4, 16, 9));
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_icon);
+  
+  // s_battery_percent
+  s_battery_percent = text_layer_create(GRect(96, 2, 28, 12));
+  text_layer_set_background_color(s_battery_percent, GColorClear);
+  text_layer_set_text_color(s_battery_percent, GColorWhite);
+  text_layer_set_text(s_battery_percent, "100%");
+  text_layer_set_text_alignment(s_battery_percent, GTextAlignmentCenter);
+  text_layer_set_font(s_battery_percent, s_res_gothic_14);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_percent);
 }
 
 static void destroy_ui(void) {
@@ -57,6 +73,8 @@ static void destroy_ui(void) {
   text_layer_destroy(s_stocks_label);
   text_layer_destroy(s_stocks);
   text_layer_destroy(s_time);
+  bitmap_layer_destroy(s_battery_icon);
+  text_layer_destroy(s_battery_percent);
 }
 // END AUTO-GENERATED UI CODE
 
@@ -64,6 +82,7 @@ static void handle_window_unload(Window* window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI\n");
   
   gbitmap_destroy(s_snoke_bitmap);
+  gbitmap_destroy(s_battery_icon_bitmap);
   destroy_ui();
 }
 
@@ -75,6 +94,8 @@ void show_ui(void) {
   // HACK: UI editor does not allow to set bitmap...
   s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
   bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
+  s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY);
+  bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);
   
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
@@ -97,9 +118,18 @@ void set_stock_price(char* price_string) {
 #define TIME_STR_SIZE 16
 static char TIME_STR[TIME_STR_SIZE];
 
+#define BATTERY_PERCENT_SIZE 5
+static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
+
 void set_time(struct tm *tick_time) {
   
   strftime(TIME_STR, TIME_STR_SIZE, "%H:%M", tick_time);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Current time: %s\n", TIME_STR);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Setting current time to %s\n", TIME_STR);
   text_layer_set_text(s_time, TIME_STR);
+}
+
+void set_battery_percent(int battery_percent) {
+  snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d", battery_percent);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
+  text_layer_set_text(s_battery_percent, BATTERY_PERCENT_STR);
 }
