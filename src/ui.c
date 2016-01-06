@@ -6,9 +6,11 @@ static GBitmap* s_snoke_bitmap;
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_14;
+static GFont s_res_gothic_24;
 static BitmapLayer *s_bitmaplayer;
 static TextLayer *s_stocks_label;
 static TextLayer *s_stocks;
+static TextLayer *s_time;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -18,12 +20,13 @@ static void initialise_ui(void) {
   #endif
   
   s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
   // s_bitmaplayer
   s_bitmaplayer = bitmap_layer_create(GRect(0, 0, 144, 168));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_bitmaplayer);
   
   // s_stocks_label
-  s_stocks_label = text_layer_create(GRect(64, 152, 32, 16));
+  s_stocks_label = text_layer_create(GRect(78, 152, 32, 16));
   text_layer_set_background_color(s_stocks_label, GColorClear);
   text_layer_set_text_color(s_stocks_label, GColorWhite);
   text_layer_set_text(s_stocks_label, "JNPR: ");
@@ -31,13 +34,21 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stocks_label);
   
   // s_stocks
-  s_stocks = text_layer_create(GRect(96, 152, 48, 16));
+  s_stocks = text_layer_create(GRect(111, 152, 32, 16));
   text_layer_set_background_color(s_stocks, GColorClear);
   text_layer_set_text_color(s_stocks, GColorWhite);
-  text_layer_set_text(s_stocks, "loading...");
-  text_layer_set_text_alignment(s_stocks, GTextAlignmentCenter);
+  text_layer_set_text(s_stocks, "Text layer");
+  text_layer_set_text_alignment(s_stocks, GTextAlignmentRight);
   text_layer_set_font(s_stocks, s_res_gothic_14);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stocks);
+  
+  // s_time
+  s_time = text_layer_create(GRect(4, 142, 49, 24));
+  text_layer_set_background_color(s_time, GColorClear);
+  text_layer_set_text_color(s_time, GColorWhite);
+  text_layer_set_text(s_time, "00:00");
+  text_layer_set_font(s_time, s_res_gothic_24);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_time);
 }
 
 static void destroy_ui(void) {
@@ -45,6 +56,7 @@ static void destroy_ui(void) {
   bitmap_layer_destroy(s_bitmaplayer);
   text_layer_destroy(s_stocks_label);
   text_layer_destroy(s_stocks);
+  text_layer_destroy(s_time);
 }
 // END AUTO-GENERATED UI CODE
 
@@ -78,3 +90,16 @@ Window* get_ui(void) {
   return s_window;
 }
 
+void set_stock_price(char* price_string) {
+  text_layer_set_text(s_stocks, price_string);
+}
+
+#define TIME_STR_SIZE 16
+static char TIME_STR[TIME_STR_SIZE];
+
+void set_time(struct tm *tick_time) {
+  
+  strftime(TIME_STR, TIME_STR_SIZE, "%H:%M", tick_time);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Current time: %s\n", TIME_STR);
+  text_layer_set_text(s_time, TIME_STR);
+}
