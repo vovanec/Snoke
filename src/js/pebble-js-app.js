@@ -40,16 +40,16 @@ var getStocksInfo = function (callback) {
   console.log('Querying for latest stock prices.');
   
   queryWeb('http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price',
-          function(resp){
-            console.log('Received service response: ' + JSON.stringify(resp));
+          function(reqObj){
+            console.log('Received service response: ' + JSON.stringify(reqObj));
             try {
-              callback(resp.responseText.split(',')[0]);
+              callback(reqObj.responseText.split(',')[0]);
             } catch(err) {
               console.log('Could not parse server response: ' + err);
             }
           },
-          function(resp){
-            console.log('Error(' + resp.status + '): ' + resp.responseText);
+          function(reqObj){
+            console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
           });
 };
 
