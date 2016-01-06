@@ -13,6 +13,12 @@
     "resources": {
         "media": [
             {
+                "file": "images/icon_battery_vert.png",
+                "name": "ICON_BATTERY_VERT",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/icon_battery.png",
                 "name": "ICON_BATTERY",
                 "targetPlatforms": null,

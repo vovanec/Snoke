@@ -54,11 +54,11 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_time);
   
   // s_battery_icon
-  s_battery_icon = bitmap_layer_create(GRect(126, 4, 16, 9));
+  s_battery_icon = bitmap_layer_create(GRect(106, 4, 9, 16));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_icon);
   
   // s_battery_percent
-  s_battery_percent = text_layer_create(GRect(96, 2, 28, 12));
+  s_battery_percent = text_layer_create(GRect(115, 4, 28, 14));
   text_layer_set_background_color(s_battery_percent, GColorClear);
   text_layer_set_text_color(s_battery_percent, GColorWhite);
   text_layer_set_text(s_battery_percent, "100%");
@@ -78,11 +78,23 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
+void init_custom_resources(void) {
+  // HACK: UI editor does not allow to set bitmap...
+  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
+  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
+  s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY_VERT);
+  bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);  
+}
+
+void destroy_custom_resources(void) {
+  gbitmap_destroy(s_snoke_bitmap);
+  gbitmap_destroy(s_battery_icon_bitmap);
+}
+
 static void handle_window_unload(Window* window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI\n");
   
-  gbitmap_destroy(s_snoke_bitmap);
-  gbitmap_destroy(s_battery_icon_bitmap);
+  destroy_custom_resources();
   destroy_ui();
 }
 
@@ -90,12 +102,7 @@ void show_ui(void) {
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI\n");
   initialise_ui();
-  
-  // HACK: UI editor does not allow to set bitmap...
-  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
-  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
-  s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY);
-  bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);
+  init_custom_resources();
   
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = handle_window_unload,
@@ -124,12 +131,12 @@ static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
 void set_time(struct tm *tick_time) {
   
   strftime(TIME_STR, TIME_STR_SIZE, "%H:%M", tick_time);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Setting current time to %s\n", TIME_STR);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current time to %s\n", TIME_STR);
   text_layer_set_text(s_time, TIME_STR);
 }
 
 void set_battery_percent(int battery_percent) {
-  snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d", battery_percent);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
+  snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d%%", battery_percent);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
   text_layer_set_text(s_battery_percent, BATTERY_PERCENT_STR);
 }
