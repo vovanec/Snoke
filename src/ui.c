@@ -59,7 +59,7 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_icon);
   
   // s_battery_percent
-  s_battery_percent = text_layer_create(GRect(115, 4, 28, 14));
+  s_battery_percent = text_layer_create(GRect(115, 3, 28, 14));
   text_layer_set_background_color(s_battery_percent, GColorClear);
   text_layer_set_text_color(s_battery_percent, GColorWhite);
   text_layer_set_text(s_battery_percent, "100%");
