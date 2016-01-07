@@ -12,6 +12,8 @@ function sendMessage(status, message_type, message) {
 	// also be called if your message send attempt times out.
 }
 
+var locationOptions = {"timeout": 15000,
+                       "maximumAge": 60000}; 
 var MSG_TYPE_STOCKS = 0;
 
 var queryWeb = function (url, on_success, on_error) {
@@ -20,7 +22,7 @@ var queryWeb = function (url, on_success, on_error) {
   req.open('GET', url, true);
   
   req.onload = function(e) {
-    if (req.readyState == 4 && req.status == 200) {
+    if (req.readyState == 4) {
       if(req.status == 200) {
         if (on_success) {
           on_success(req);
@@ -34,6 +36,38 @@ var queryWeb = function (url, on_success, on_error) {
   };
   req.send(null);
 };
+
+function fetchWeather(latitude, longitude) {
+  var url = "http://www.mirz.com/Chunk2/Yahoo.php?lat=" + latitude + "&long=" + longitude + "&v=24&units=c";
+  console.log("Fetching Weather, URL " + url);
+  
+  queryWeb(url,
+           function(reqObj) {
+             console.log('Weather info: ' + JSON.stringify(reqObj));
+           },
+           function(reqObj) {
+             console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
+           }
+  );
+}
+
+
+
+var locationSuccess = function (pos) {
+    var coordinates = pos.coords;
+    fetchWeather(coordinates.latitude, coordinates.longitude);
+};
+
+var locationError = function (err) {
+  console.log('Could not query location services: ' + JSON.stringify(err));
+};
+
+function getWeatherInfo() {
+  console.log('Querying location services.');
+  navigator.geolocation.getCurrentPosition(locationSuccess,
+                                           locationError,
+                                           locationOptions);		
+}
 
 
 var getStocksInfo = function (callback) {
@@ -75,6 +109,8 @@ Pebble.addEventListener("appmessage",
 Pebble.addEventListener("ready",
 							function(e) {
                 console.log("JS is ready!!!");
+                
+                getWeatherInfo();
                 
                 getStocksInfo(function(resp) {
                   sendMessage(0, MSG_TYPE_STOCKS, resp);                   

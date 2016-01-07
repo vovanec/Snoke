@@ -54,7 +54,7 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_time);
   
   // s_battery_icon
-  s_battery_icon = bitmap_layer_create(GRect(109, 5, 6, 12));
+  s_battery_icon = bitmap_layer_create(GRect(107, 5, 6, 12));
   bitmap_layer_set_background_color(s_battery_icon, GColorWhite);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_icon);
   
