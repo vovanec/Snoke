@@ -1,3 +1,26 @@
+
+var sendMessageWithRetries = function (msg, retryNum) {
+  
+  if (retryNum === undefined) {
+    retryNum = 0;
+  }
+  
+  if (retryNum >= 3) {
+    console.log('Error: could not send app message to the frontend three times. Giving up.');
+    return;
+  }
+  
+  Pebble.sendAppMessage(msg, 
+                        function (obj) {
+                          console.log('Success: ' + JSON.stringify(obj));
+                        },
+                        function (obj) {
+                          console.log('Error: ' + JSON.stringify(obj));
+                          sendMessageWithRetries (msg, retryNum + 1);
+                        });
+};
+
+
 // Function to send a message to the Pebble using AppMessage API
 var sendMessage = function (status, message_type, message) {
   var msg = {'status': status,
@@ -5,13 +28,7 @@ var sendMessage = function (status, message_type, message) {
              'message': message};
   console.log('Sending message to the frontend: ' + JSON.stringify(msg));
   
-  Pebble.sendAppMessage(msg, 
-                       function (obj) {
-                         console.log('Success: ' + JSON.stringify(obj));
-                       },
-                       function (obj) {
-                         console.log('Error: ' + JSON.stringify(obj));
-                       });
+  sendMessageWithRetries(msg);
 	
 	// PRO TIP: If you are sending more than one message, or a complex set of messages, 
 	// it is important that you setup an ackHandler and a nackHandler and call 

@@ -145,10 +145,10 @@ Window* get_ui(void) {
 
 void set_stock_price(char* price_string) {
   
-  //strncpy(STOCK_PRICE_STR, price_string, STOCK_PRICE_SIZE);
-  //STOCK_PRICE_STR[STOCK_PRICE_SIZE - 1] = '\0';
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", price_string);  
-  text_layer_set_text(s_stocks, price_string);
+  strncpy(STOCK_PRICE_STR, price_string, STOCK_PRICE_SIZE);
+  STOCK_PRICE_STR[STOCK_PRICE_SIZE - 1] = '\0';
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", STOCK_PRICE_STR);  
+  text_layer_set_text(s_stocks, STOCK_PRICE_STR);
 }
 
 void set_weather_info(char* weather) {

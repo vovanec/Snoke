@@ -45,14 +45,14 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 	
 	tuple = dict_find(received, STATUS_KEY);
 	if(!tuple) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract status code from backend response.");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract status code from backend response.\n");
     return;
   }
   status = (int)tuple->value->uint32;
   
 	tuple = dict_find(received, MESSAGE_TYPE_KEY);
 	if(!tuple) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message type from backend response.");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message type from backend response.\n");
     return;
   }
   message_type = (int)tuple->value->uint32;
@@ -60,7 +60,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 
 	tuple = dict_find(received, MESSAGE_KEY);
 	if(!tuple) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message from backend response.");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Could not extract message from backend response.\n");
     return;
   }
   message = tuple->value->cstring;    
@@ -85,12 +85,14 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 
 // Called when an incoming message from PebbleKitJS is dropped
 static void in_dropped_handler(AppMessageResult reason, void *context) {	
-  APP_LOG(APP_LOG_LEVEL_ERROR, "App message dropped.");
+  
+  APP_LOG(APP_LOG_LEVEL_ERROR, "App message dropped.\n");
 }
 
 // Called when PebbleKitJS does not acknowledge receipt of a message
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Could not acknowledge pp message.");
+  
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Backend could not accept app message.\n");
 }
 
 
@@ -99,12 +101,12 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
   
   if (tick_time->tm_min == 0) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.\n");
     query_backend(MSG_TYPE_STOCKS);
   } 
   
   if (tick_time->tm_min % 20 == 0) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for weather info update.");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for weather info update.\n");
     query_backend(MSG_TYPE_WEATHER);
   }
   
@@ -112,6 +114,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void update_battery(BatteryChargeState charge_state) {
+  
   set_battery_percent(charge_state.charge_percent);
 }
 
@@ -124,7 +127,8 @@ void init(void) {
 	app_message_register_inbox_dropped(in_dropped_handler); 
 	app_message_register_outbox_failed(out_failed_handler);
 		
-	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+	app_message_open(app_message_inbox_size_maximum(),
+                   app_message_outbox_size_maximum());
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
   
