@@ -4,6 +4,13 @@
 static GBitmap* s_snoke_bitmap;
 static GBitmap* s_battery_icon_bitmap;
 
+#define TIME_STR_SIZE 16
+static char TIME_STR[TIME_STR_SIZE];
+
+#define BATTERY_PERCENT_SIZE 5
+static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
+
+
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_14;
@@ -14,6 +21,7 @@ static TextLayer *s_stocks;
 static TextLayer *s_time;
 static BitmapLayer *s_battery_icon;
 static TextLayer *s_battery_percent;
+static TextLayer *s_weather;
 
 static void initialise_ui(void) {
   s_window = window_create();
@@ -66,6 +74,15 @@ static void initialise_ui(void) {
   text_layer_set_text_alignment(s_battery_percent, GTextAlignmentCenter);
   text_layer_set_font(s_battery_percent, s_res_gothic_14);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_percent);
+  
+  // s_weather
+  s_weather = text_layer_create(GRect(7, 126, 132, 16));
+  text_layer_set_background_color(s_weather, GColorClear);
+  text_layer_set_text_color(s_weather, GColorWhite);
+  text_layer_set_text(s_weather, "     ");
+  text_layer_set_text_alignment(s_weather, GTextAlignmentCenter);
+  text_layer_set_font(s_weather, s_res_gothic_14);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_weather);
 }
 
 static void destroy_ui(void) {
@@ -76,6 +93,7 @@ static void destroy_ui(void) {
   text_layer_destroy(s_time);
   bitmap_layer_destroy(s_battery_icon);
   text_layer_destroy(s_battery_percent);
+  text_layer_destroy(s_weather);
 }
 // END AUTO-GENERATED UI CODE
 
@@ -120,18 +138,14 @@ Window* get_ui(void) {
 }
 
 void set_stock_price(char* price_string) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", price_string);  
   text_layer_set_text(s_stocks, price_string);
 }
 
 void set_weather_info(char* weather) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current weather info to %s\n", weather);    
   text_layer_set_text(s_weather, weather);
 }
-
-#define TIME_STR_SIZE 16
-static char TIME_STR[TIME_STR_SIZE];
-
-#define BATTERY_PERCENT_SIZE 5
-static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
 
 void set_time(struct tm *tick_time) {
   

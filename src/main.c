@@ -74,6 +74,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
       set_stock_price(message);    
       break;
     case MSG_TYPE_WEATHER:
+      set_weather_info(message);
       break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %d.\n", message_type);
