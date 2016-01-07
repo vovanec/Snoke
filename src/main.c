@@ -93,9 +93,12 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
+  
   if (tick_time->tm_min == 0) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying for stock info update.");
     query_backend(MSG_TYPE_STOCKS);
+  } else if (tick_time->tm_min % 20 == 0) {
+    query_backend(MSG_TYPE_WEATHER);
   }
   set_time(tick_time);
 }
@@ -116,6 +119,7 @@ void init(void) {
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+  
   update_battery(battery_state_service_peek());
   battery_state_service_subscribe(&update_battery);  
 }

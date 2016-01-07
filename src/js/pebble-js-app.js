@@ -105,12 +105,13 @@ var getStocksInfo = function (callback) {
 Pebble.addEventListener("appmessage",
 							function(e) {
 								console.log("Received app message: " + JSON.stringify(e));
+                
                 var msg_type = e.payload.message_type;
                 
                 if (msg_type === MSG_TYPE_STOCKS) {
                   getStocksInfo(function(resp) {
-                  sendMessage(0, MSG_TYPE_STOCKS, resp);
-                });
+                    sendMessage(0, MSG_TYPE_STOCKS, resp);
+                  });
                 } else if (msg_type === MSG_TYPE_WEATHER) {
                   getWeatherInfo(function(resp) {
                     sendMessage(0, MSG_TYPE_WEATHER, resp);
