@@ -1,8 +1,11 @@
 // Function to send a message to the Pebble using AppMessage API
 var sendMessage = function (status, message_type, message) {
-  Pebble.sendAppMessage({'status': status,
-                         'message_type': message_type,
-                         'message': message});
+  var msg = {'status': status,
+             'message_type': message_type,
+             'message': message};
+  console.log('Sending message to the frontend: ' + JSON.stringify(msg));
+  
+  Pebble.sendAppMessage(msg);
 	
 	// PRO TIP: If you are sending more than one message, or a complex set of messages, 
 	// it is important that you setup an ackHandler and a nackHandler and call 
