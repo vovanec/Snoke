@@ -45,18 +45,26 @@ var fetchWeather = function (latitude, longitude, callback) {
   
   queryWeb(url,
            function(reqObj) {
+             var weatherStr;
+             
              console.log('Weather info: ' + JSON.stringify(reqObj));             
-             var jsonResp = JSON.parse(reqObj.response);
-             var weatherStr = jsonResp.main.temp + 'C, ' + jsonResp.weather[0].description;
-             console.log(weatherStr);
+             try {
+               var jsonResp = JSON.parse(reqObj.response);
+               var temp = Math.round(jsonResp.main.temp);
+               weatherStr = temp + 'C, ' + jsonResp.weather[0].description;               
+             } catch (err) {
+               console.log('Could not parse weather server response: ' + JSON.stringify(err));
+                return; 
+             }             
+             
              if (callback) {
                callback(weatherStr);
              }
+             
            },
            function(reqObj) {
              console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
-           }
-  );
+           });
 };
 
 var getWeatherInfo = function (callback) {
