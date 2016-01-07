@@ -40,6 +40,8 @@ static void initialise_ui(void) {
   s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
   // s_bitmaplayer
   s_bitmaplayer = bitmap_layer_create(GRect(0, 0, 144, 168));
+  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
+  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);  
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_bitmaplayer);
   
   // s_stocks_label
@@ -105,19 +107,19 @@ static void destroy_ui(void) {
 
 void init_custom_resources(void) {
   // HACK: UI editor does not allow to set bitmap...
-  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
-  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
-  s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY_VERT);
-  bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);  
+  //s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
+  //bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
+  //s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY_VERT);
+  //bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);
 }
 
 void destroy_custom_resources(void) {
   gbitmap_destroy(s_snoke_bitmap);
-  gbitmap_destroy(s_battery_icon_bitmap);
+  //gbitmap_destroy(s_battery_icon_bitmap);
 }
 
 static void handle_window_unload(Window* window) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI\n");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
   
   destroy_custom_resources();
   destroy_ui();
@@ -125,7 +127,8 @@ static void handle_window_unload(Window* window) {
 
 void show_ui(void) {
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI\n");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI.\n");
+  
   initialise_ui();
   init_custom_resources();
   
@@ -133,15 +136,12 @@ void show_ui(void) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized\n");  
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");  
 }
 
 void hide_ui(void) {
   window_stack_remove(s_window, true);
-}
-
-Window* get_ui(void) {
-  return s_window;
 }
 
 void set_stock_price(char* price_string) {

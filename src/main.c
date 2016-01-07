@@ -56,7 +56,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     return;
   }
   message_type = (int)tuple->value->uint32;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message Type: %d", message_type);   
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message type: %d.\n", message_type);   
 
 	tuple = dict_find(received, MESSAGE_KEY);
 	if(!tuple) {
@@ -64,10 +64,10 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     return;
   }
   message = tuple->value->cstring;    
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Message: %s", message);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message string: %s.\n", message);
   
   if (status != STATUS_OK) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s\n", status, message);
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s.\n", status, message);
     return;
   }
   
@@ -118,6 +118,10 @@ static void update_battery(BatteryChargeState charge_state) {
   set_battery_percent(charge_state.charge_percent);
 }
 
+static void bluetooth_connection_callback(bool connected) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Bluetooth is %s.\n", connected ? "connected" : "disconnected");
+}
+
 void init(void) {  
 	show_ui();
   
@@ -128,16 +132,21 @@ void init(void) {
 	app_message_open(app_message_inbox_size_maximum(),
                    app_message_outbox_size_maximum());
   
-  
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
   
   update_battery(battery_state_service_peek());
   battery_state_service_subscribe(&update_battery);  
+    
+  bluetooth_connection_service_subscribe(bluetooth_connection_callback);
 }
 
 void deinit(void) {
     
 	app_message_deregister_callbacks();
+  tick_timer_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  bluetooth_connection_service_unsubscribe();
+  
   hide_ui();
 }
 

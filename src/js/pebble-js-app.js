@@ -75,7 +75,7 @@ var fetchWeather = function (latitude, longitude, callback) {
            function(reqObj) {
              var weatherStr;
              
-             console.log('Weather info: ' + JSON.stringify(reqObj));             
+             //console.log('Weather info: ' + JSON.stringify(reqObj));             
              try {
                var jsonResp = JSON.parse(reqObj.response);
                var temp = Math.round(jsonResp.main.temp);
@@ -116,7 +116,7 @@ var getStocksInfo = function (callback) {
   
   queryWeb('http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price',
           function(reqObj){
-            console.log('Received service response: ' + JSON.stringify(reqObj));
+            //console.log('Received service response: ' + JSON.stringify(reqObj));
             try {
               callback(reqObj.responseText.split(',')[0]);
             } catch(err) {
@@ -153,7 +153,7 @@ Pebble.addEventListener("appmessage",
 // Called when JS is ready
 Pebble.addEventListener("ready",
 							function(e) {
-                console.log("JS is ready!!!");
+                console.log("JavaScript backend is ready.");
                 
                 getWeatherInfo(function(resp) {
                   sendMessage(0, MSG_TYPE_WEATHER, resp);                   
