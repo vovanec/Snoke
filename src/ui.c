@@ -76,7 +76,7 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_percent);
   
   // s_weather
-  s_weather = text_layer_create(GRect(7, 126, 132, 16));
+  s_weather = text_layer_create(GRect(7, 128, 132, 16));
   text_layer_set_background_color(s_weather, GColorClear);
   text_layer_set_text_color(s_weather, GColorWhite);
   text_layer_set_text(s_weather, "     ");
