@@ -133,6 +133,7 @@ void show_ui(void) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized\n");  
 }
 
 void hide_ui(void) {

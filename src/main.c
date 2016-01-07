@@ -118,17 +118,16 @@ static void update_battery(BatteryChargeState charge_state) {
   set_battery_percent(charge_state.charge_percent);
 }
 
-void init(void) {
+void init(void) {  
+	show_ui();
   
-  show_ui();    
-	
-	// Register AppMessage handlers
 	app_message_register_inbox_received(in_received_handler); 
 	app_message_register_inbox_dropped(in_dropped_handler); 
 	app_message_register_outbox_failed(out_failed_handler);
 		
 	app_message_open(app_message_inbox_size_maximum(),
                    app_message_outbox_size_maximum());
+  
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
   

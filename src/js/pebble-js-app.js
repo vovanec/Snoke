@@ -14,9 +14,11 @@ var sendMessageWithRetries = function (msg, retryNum) {
                         function (obj) {
                           console.log('Success: ' + JSON.stringify(obj));
                         },
-                        function (obj) {
-                          console.log('Error: ' + JSON.stringify(obj));
-                          sendMessageWithRetries (msg, retryNum + 1);
+                        function (obj, error) {
+                          console.log('Error: ' + JSON.stringify(error));
+                          setTimeout(function() {
+                                       sendMessageWithRetries (msg, retryNum + 1);                                       
+                                     }, 1000);
                         });
 };
 
