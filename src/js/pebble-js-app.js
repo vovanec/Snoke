@@ -18,7 +18,7 @@ var sendMessageWithRetries = function (msg, retryNum) {
 
     Pebble.sendAppMessage(msg,
         function (obj) {
-            console.log('Success: ' + JSON.stringify(obj));
+            //console.log('Success: ' + JSON.stringify(obj));
         },
         function (obj) {
             console.log('Error: ' + JSON.stringify(obj));
@@ -99,25 +99,27 @@ var fetchWeather = function (latitude, longitude, callback) {
 };
 
 var getWeatherInfo = function (callback) {
-    console.log('Querying location services.');
+    console.log('Querying device geolocation services.');
 
     navigator.geolocation.getCurrentPosition(
         function (pos) {
             var coordinates = pos.coords;
-            console.log('Coordinates: ' + JSON.stringify(pos));
+            //console.log('Coordinates: ' + JSON.stringify(pos));
             fetchWeather(coordinates.latitude, coordinates.longitude, callback);
         },
         function (err) {
-            console.log('Could not query location services: ' + JSON.stringify(err));
+            console.log('Could not query geolocation services: ' + JSON.stringify(err));
         },
         {'timeout': 15000, 'maximumAge': 60000});
 };
 
 
 var getStocksInfo = function (callback) {
-    console.log('Querying for latest stock prices.');
-
-    queryWeb('http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price',
+    
+    var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price';
+    console.log("Fetching stocks information, URL " + url);
+  
+    queryWeb(url,
         function (reqObj) {
             //console.log('Received service response: ' + JSON.stringify(reqObj));
             try {
@@ -154,7 +156,7 @@ Pebble.addEventListener("appmessage",
 
 Pebble.addEventListener("ready",
     function (e) {
-        console.log("JavaScript backend is ready.");
+        console.log("Device backend is ready.");
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
