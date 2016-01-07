@@ -5,7 +5,13 @@ var sendMessage = function (status, message_type, message) {
              'message': message};
   console.log('Sending message to the frontend: ' + JSON.stringify(msg));
   
-  Pebble.sendAppMessage(msg);
+  Pebble.sendAppMessage(msg, 
+                       function (obj) {
+                         console.log('Success: ' + JSON.stringify(obj));
+                       },
+                       function (obj) {
+                         console.log('Error: ' + JSON.stringify(obj));
+                       });
 	
 	// PRO TIP: If you are sending more than one message, or a complex set of messages, 
 	// it is important that you setup an ackHandler and a nackHandler and call 
@@ -136,6 +142,6 @@ Pebble.addEventListener("ready",
                 
                 getStocksInfo(function(resp) {
                   sendMessage(0, MSG_TYPE_STOCKS, resp);                   
-                });                
+                });
                 
 							});

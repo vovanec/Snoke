@@ -22,6 +22,7 @@ enum {
 
 // Write message to buffer & send
 void query_backend(int message_type){
+  
 	DictionaryIterator *iter;
 	
 	app_message_outbox_begin(&iter);
@@ -36,6 +37,7 @@ void query_backend(int message_type){
 
 // Called when a message is received from PebbleKitJS
 static void in_received_handler(DictionaryIterator *received, void *context) {
+  
 	Tuple *tuple;
   int status;
   int message_type;
@@ -83,10 +85,12 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 
 // Called when an incoming message from PebbleKitJS is dropped
 static void in_dropped_handler(AppMessageResult reason, void *context) {	
+  APP_LOG(APP_LOG_LEVEL_ERROR, "App message dropped.");
 }
 
 // Called when PebbleKitJS does not acknowledge receipt of a message
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Could not acknowledge pp message.");
 }
 
 
