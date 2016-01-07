@@ -1,6 +1,9 @@
 #include <pebble.h>
 #include "ui.h"
 
+// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
+// END AUTO-GENERATED UI CODE
+
 static GBitmap* s_snoke_bitmap;
 static GBitmap* s_battery_icon_bitmap;
 
@@ -16,11 +19,11 @@ static char STOCK_PRICE_STR[STOCK_PRICE_SIZE];
 #define WEATHER_SIZE 32
 static char WEATHER_STR[WEATHER_SIZE];
 
-
-// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_14;
+static GFont s_res_gothic_18;
 static GFont s_res_gothic_24;
+static GFont s_res_gothic_28;
 static BitmapLayer *s_bitmaplayer;
 static TextLayer *s_stocks_label;
 static TextLayer *s_stocks;
@@ -29,40 +32,48 @@ static BitmapLayer *s_battery_icon;
 static TextLayer *s_battery_percent;
 static TextLayer *s_weather;
 
-static void initialise_ui(void) {
-  s_window = window_create();
+
+static void handle_window_load(Window *window) {
+  
   window_set_background_color(s_window, GColorBlack);
+  
   #ifndef PBL_SDK_3
     window_set_fullscreen(s_window, true);
   #endif
   
   s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);  
   s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
+  s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_28);  
+  
   // s_bitmaplayer
-  s_bitmaplayer = bitmap_layer_create(GRect(0, 0, 144, 168));
-  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
-  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);  
-  layer_add_child(window_get_root_layer(s_window), (Layer *)s_bitmaplayer);
+  s_bitmaplayer = bitmap_layer_create(GRect(0, 0, 113, 127));
+  s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_SMALL);
+	
+  //bitmap_layer_set_compositing_mode(s_bitmaplayer, GCompOpAssign);
+  //bitmap_layer_set_alignment(s_bitmaplayer, GAlignCenter);
+  bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);    
+  layer_add_child(window_get_root_layer(s_window), (Layer*)s_bitmaplayer);
   
   // s_stocks_label
-  s_stocks_label = text_layer_create(GRect(78, 152, 32, 16));
+  s_stocks_label = text_layer_create(GRect(72, 148, 32, 20));
   text_layer_set_background_color(s_stocks_label, GColorClear);
   text_layer_set_text_color(s_stocks_label, GColorWhite);
   text_layer_set_text(s_stocks_label, "JNPR: ");
-  text_layer_set_font(s_stocks_label, s_res_gothic_14);
+  text_layer_set_font(s_stocks_label, s_res_gothic_18);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stocks_label);
   
   // s_stocks
-  s_stocks = text_layer_create(GRect(111, 152, 32, 16));
+  s_stocks = text_layer_create(GRect(105, 148, 38, 20));
   text_layer_set_background_color(s_stocks, GColorClear);
   text_layer_set_text_color(s_stocks, GColorWhite);
   text_layer_set_text(s_stocks, "    ");
   text_layer_set_text_alignment(s_stocks, GTextAlignmentRight);
-  text_layer_set_font(s_stocks, s_res_gothic_14);
+  text_layer_set_font(s_stocks, s_res_gothic_18);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stocks);
   
   // s_time
-  s_time = text_layer_create(GRect(4, 142, 49, 24));
+  s_time = text_layer_create(GRect(4, 138, 54, 32));
   text_layer_set_background_color(s_time, GColorClear);
   text_layer_set_text_color(s_time, GColorWhite);
   text_layer_set_text(s_time, "00:00");
@@ -75,7 +86,7 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_battery_icon);
   
   // s_battery_percent
-  s_battery_percent = text_layer_create(GRect(115, 3, 28, 14));
+  s_battery_percent = text_layer_create(GRect(115, 2, 28, 14));
   text_layer_set_background_color(s_battery_percent, GColorClear);
   text_layer_set_text_color(s_battery_percent, GColorWhite);
   text_layer_set_text(s_battery_percent, "100%");
@@ -91,9 +102,14 @@ static void initialise_ui(void) {
   text_layer_set_text_alignment(s_weather, GTextAlignmentCenter);
   text_layer_set_font(s_weather, s_res_gothic_14);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_weather);
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");  
 }
 
-static void destroy_ui(void) {
+static void handle_window_unload(Window* window) {
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
+  
   window_destroy(s_window);
   bitmap_layer_destroy(s_bitmaplayer);
   text_layer_destroy(s_stocks_label);
@@ -102,46 +118,26 @@ static void destroy_ui(void) {
   bitmap_layer_destroy(s_battery_icon);
   text_layer_destroy(s_battery_percent);
   text_layer_destroy(s_weather);
-}
-// END AUTO-GENERATED UI CODE
-
-void init_custom_resources(void) {
-  // HACK: UI editor does not allow to set bitmap...
-  //s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP);
-  //bitmap_layer_set_bitmap(s_bitmaplayer, s_snoke_bitmap);
-  //s_battery_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_BATTERY_VERT);
-  //bitmap_layer_set_bitmap(s_battery_icon, s_battery_icon_bitmap);
-}
-
-void destroy_custom_resources(void) {
   gbitmap_destroy(s_snoke_bitmap);
-  //gbitmap_destroy(s_battery_icon_bitmap);
+  //gbitmap_destroy(s_battery_icon_bitmap);  
 }
 
-static void handle_window_unload(Window* window) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
-  
-  destroy_custom_resources();
-  destroy_ui();
+void hide_ui(void) {
+  window_stack_remove(s_window, true);
 }
 
 void show_ui(void) {
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI.\n");
   
-  initialise_ui();
-  init_custom_resources();
+  s_window = window_create();
   
   window_set_window_handlers(s_window, (WindowHandlers) {
+    .load = handle_window_load,
     .unload = handle_window_unload,
   });
+  
   window_stack_push(s_window, true);
-
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");  
-}
-
-void hide_ui(void) {
-  window_stack_remove(s_window, true);
 }
 
 void set_stock_price(char* price_string) {

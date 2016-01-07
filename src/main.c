@@ -56,7 +56,6 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     return;
   }
   message_type = (int)tuple->value->uint32;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message type: %d.\n", message_type);   
 
 	tuple = dict_find(received, MESSAGE_KEY);
 	if(!tuple) {
@@ -64,7 +63,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     return;
   }
   message = tuple->value->cstring;    
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message string: %s.\n", message);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Received message type %d, message string: %s.\n", message_type, message);
   
   if (status != STATUS_OK) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s.\n", status, message);
@@ -98,7 +97,7 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
   
   if (tick_time->tm_min == 0) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.\n");
@@ -123,6 +122,7 @@ static void bluetooth_connection_callback(bool connected) {
 }
 
 void init(void) {  
+  
 	show_ui();
   
 	app_message_register_inbox_received(in_received_handler); 

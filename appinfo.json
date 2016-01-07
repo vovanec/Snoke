@@ -13,6 +13,19 @@
     "resources": {
         "media": [
             {
+                "file": "images/snoke_bitmap_icon.png",
+                "menuIcon": true,
+                "name": "SNOKE_ICON",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "images/snoke_bitmap_small.png",
+                "name": "SNOKE_BITMAP_SMALL",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/icon_battery_vert.png",
                 "name": "ICON_BATTERY_VERT",
                 "targetPlatforms": null,
