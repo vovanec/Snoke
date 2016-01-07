@@ -123,6 +123,10 @@ void set_stock_price(char* price_string) {
   text_layer_set_text(s_stocks, price_string);
 }
 
+void set_weather_info(char* weather) {
+  text_layer_set_text(s_weather, weather);
+}
+
 #define TIME_STR_SIZE 16
 static char TIME_STR[TIME_STR_SIZE];
 

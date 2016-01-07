@@ -1,5 +1,5 @@
 // Function to send a message to the Pebble using AppMessage API
-function sendMessage(status, message_type, message) {
+var sendMessage = function (status, message_type, message) {
   Pebble.sendAppMessage({'status': status,
                          'message_type': message_type,
                          'message': message});
@@ -10,11 +10,11 @@ function sendMessage(status, message_type, message) {
 	// will designate the ackHandler and nackHandler that will be called upon the Pebble 
 	// ack-ing or nack-ing the message you just sent. The specified nackHandler will 
 	// also be called if your message send attempt times out.
-}
+};
 
-var locationOptions = {"timeout": 15000,
-                       "maximumAge": 60000}; 
+var API_KEY = '06b39af7c6a935a503f792db5cc79de3';
 var MSG_TYPE_STOCKS = 0;
+var MSG_TYPE_WEATHER = 1;
 
 var queryWeb = function (url, on_success, on_error) {
   
@@ -37,37 +37,42 @@ var queryWeb = function (url, on_success, on_error) {
   req.send(null);
 };
 
-function fetchWeather(latitude, longitude) {
-  var url = "http://www.mirz.com/Chunk2/Yahoo.php?lat=" + latitude + "&long=" + longitude + "&v=24&units=c";
-  console.log("Fetching Weather, URL " + url);
+
+var fetchWeather = function (latitude, longitude, callback) {
+  var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + latitude + 
+            '&lon=' + longitude + '&units=metric&APPID=' + API_KEY;
+  console.log("Fetching weather information, URL " + url);
   
   queryWeb(url,
            function(reqObj) {
-             console.log('Weather info: ' + JSON.stringify(reqObj));
+             console.log('Weather info: ' + JSON.stringify(reqObj));             
+             var jsonResp = JSON.parse(reqObj.response);
+             var weatherStr = jsonResp.main.temp + 'C, ' + jsonResp.weather[0].description;
+             console.log(weatherStr);
+             if (callback) {
+               callback(weatherStr);
+             }
            },
            function(reqObj) {
              console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
            }
   );
-}
-
-
-
-var locationSuccess = function (pos) {
-    var coordinates = pos.coords;
-    fetchWeather(coordinates.latitude, coordinates.longitude);
 };
 
-var locationError = function (err) {
-  console.log('Could not query location services: ' + JSON.stringify(err));
-};
-
-function getWeatherInfo() {
+var getWeatherInfo = function (callback) {
   console.log('Querying location services.');
-  navigator.geolocation.getCurrentPosition(locationSuccess,
-                                           locationError,
-                                           locationOptions);		
-}
+  
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      var coordinates = pos.coords;
+      console.log('Coordinates: ' + JSON.stringify(pos));
+      fetchWeather(coordinates.latitude, coordinates.longitude, callback);
+    },
+    function (err) {
+      console.log('Could not query location services: ' + JSON.stringify(err));
+    },
+    {'timeout': 15000, 'maximumAge': 60000});
+};
 
 
 var getStocksInfo = function (callback) {
@@ -96,9 +101,12 @@ Pebble.addEventListener("appmessage",
                 
                 if (msg_type === MSG_TYPE_STOCKS) {
                   getStocksInfo(function(resp) {
-    								sendMessage(0, MSG_TYPE_STOCKS, resp);                   
+                  sendMessage(0, MSG_TYPE_STOCKS, resp);
+                });
+                } else if (msg_type === MSG_TYPE_WEATHER) {
+                  getWeatherInfo(function(resp) {
+                    sendMessage(0, MSG_TYPE_WEATHER, resp);
                   });
-                  
                 } else {
                   console.log('Error: unknown message type received: ' + msg_type);
                 }
@@ -110,7 +118,9 @@ Pebble.addEventListener("ready",
 							function(e) {
                 console.log("JS is ready!!!");
                 
-                getWeatherInfo();
+                getWeatherInfo(function(resp) {
+                  sendMessage(0, MSG_TYPE_WEATHER, resp);                   
+                });
                 
                 getStocksInfo(function(resp) {
                   sendMessage(0, MSG_TYPE_STOCKS, resp);                   
