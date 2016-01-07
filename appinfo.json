@@ -13,6 +13,12 @@
     "resources": {
         "media": [
             {
+                "file": "images/snoke_bitmap_small.png",
+                "name": "SNOKE_BITMAP_SMALL",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/snoke_bitmap_icon.png",
                 "menuIcon": true,
                 "name": "SNOKE_ICON",
@@ -20,9 +26,11 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/snoke_bitmap_small.png",
-                "name": "SNOKE_BITMAP_SMALL",
-                "targetPlatforms": null,
+                "file": "images/snoke_bitmap.png",
+                "name": "SNOKE_BITMAP",
+                "targetPlatforms": [
+                    "aplite"
+                ],
                 "type": "bitmap"
             },
             {
@@ -35,14 +43,6 @@
                 "file": "images/icon_battery.png",
                 "name": "ICON_BATTERY",
                 "targetPlatforms": null,
-                "type": "bitmap"
-            },
-            {
-                "file": "images/snoke_bitmap.png",
-                "name": "SNOKE_BITMAP",
-                "targetPlatforms": [
-                    "aplite"
-                ],
                 "type": "bitmap"
             }
         ]
