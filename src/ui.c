@@ -10,6 +10,12 @@ static char TIME_STR[TIME_STR_SIZE];
 #define BATTERY_PERCENT_SIZE 5
 static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
 
+#define STOCK_PRICE_SIZE 16
+static char STOCK_PRICE_STR[STOCK_PRICE_SIZE];
+
+#define WEATHER_SIZE 32
+static char WEATHER_STR[WEATHER_SIZE];
+
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -138,13 +144,19 @@ Window* get_ui(void) {
 }
 
 void set_stock_price(char* price_string) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", price_string);  
-  text_layer_set_text(s_stocks, price_string);
+  
+  strncpy(STOCK_PRICE_STR, price_string, STOCK_PRICE_SIZE);
+  STOCK_PRICE_STR[STOCK_PRICE_SIZE - 1] = '\0';
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", STOCK_PRICE_STR);  
+  text_layer_set_text(s_stocks, STOCK_PRICE_STR);
 }
 
 void set_weather_info(char* weather) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current weather info to %s\n", weather);    
-  text_layer_set_text(s_weather, weather);
+  
+  strncpy(WEATHER_STR, weather, WEATHER_SIZE);
+  WEATHER_STR[WEATHER_SIZE - 1] = '\0';
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current weather info to %s\n", WEATHER_STR);    
+  text_layer_set_text(s_weather, WEATHER_STR);
 }
 
 void set_time(struct tm *tick_time) {
