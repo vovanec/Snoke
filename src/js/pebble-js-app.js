@@ -1,5 +1,5 @@
 
-var VERBOSE = true;
+var VERBOSE = false;
 var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
 
