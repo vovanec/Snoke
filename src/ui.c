@@ -21,7 +21,6 @@ static char WEATHER_STR[WEATHER_SIZE];
 
 static Window *s_window;
 static BitmapLayer *s_bitmap_layer;
-static TextLayer *s_stocks_layer;
 static TextLayer *s_stocks;
 static TextLayer *s_time;
 static BitmapLayer *s_battery_icon;
@@ -30,18 +29,18 @@ static TextLayer *s_weather;
 
 
 static void handle_window_load(Window *window) {
-    
+
     window_set_background_color(window, GColorBlack);
 
 #ifndef PBL_SDK_3
     window_set_fullscreen(window, true);
 #endif
-    
+
     GFont s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14);
     GFont s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);
-    GFont s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);    
-    GFont s_res_gothic_28 = fonts_get_system_font(FONT_KEY_GOTHIC_28);    
-    
+    GFont s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
+    GFont s_res_gothic_28 = fonts_get_system_font(FONT_KEY_GOTHIC_28);
+
     Layer* root_layer = window_get_root_layer(window);
 
     // s_bitmaplayer
@@ -50,20 +49,12 @@ static void handle_window_load(Window *window) {
     bitmap_layer_set_bitmap(s_bitmap_layer, s_snoke_bitmap);
     layer_add_child(root_layer, (Layer*)s_bitmap_layer);
 
-    // s_stocks_label
-    s_stocks_layer = text_layer_create(GRect(72, 147, 32, 20));
-    text_layer_set_background_color(s_stocks_layer, GColorClear);
-    text_layer_set_text_color(s_stocks_layer, GColorWhite);
-    text_layer_set_text(s_stocks_layer, "JNPR: ");
-    text_layer_set_font(s_stocks_layer, s_res_gothic_18);
-    layer_add_child(root_layer, (Layer *)s_stocks_layer);
-
     // s_stocks
-    s_stocks = text_layer_create(GRect(105, 147, 38, 20));
+    s_stocks = text_layer_create(GRect(59, 147, 80, 20));
     text_layer_set_background_color(s_stocks, GColorClear);
     text_layer_set_text_color(s_stocks, GColorWhite);
-    text_layer_set_text(s_stocks, "    ");
     text_layer_set_text_alignment(s_stocks, GTextAlignmentRight);
+    text_layer_set_text(s_stocks, "");
     text_layer_set_font(s_stocks, s_res_gothic_18);
     layer_add_child(root_layer, (Layer *)s_stocks);
 
@@ -106,18 +97,17 @@ static void handle_window_unload(Window* window) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
 
     window_destroy(window);
-    
+
     bitmap_layer_destroy(s_bitmap_layer);
     gbitmap_destroy(s_snoke_bitmap);
-    
-    text_layer_destroy(s_stocks_layer);
+
     text_layer_destroy(s_stocks);
-    
+
     text_layer_destroy(s_time);
-    
+
     bitmap_layer_destroy(s_battery_icon);
     text_layer_destroy(s_battery_percent);
-    
+
     text_layer_destroy(s_weather);
     //gbitmap_destroy(s_battery_icon_bitmap);
 }

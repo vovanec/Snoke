@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel='stylesheet' type='text/css' href='/bower_components/pebble-slate/dist/css/slate.min.css'>
+    <link rel='stylesheet' type='text/css' href='/css/style.css'>
+</head>
+<body>
+
+<div class='item-container'>
+    <h1 class='title'>Snoke Watchface<br>Configuration</h1>
+</div>
+
+<div class='item-container'>
+    <div class='item-container-header'>Stock Company Symbol</div>
+    <div class='item-container-content'>
+        <label class="item">
+            <input type="text" class="item-input" name="stock-input"
+                   placeholder="" id="stockSymbol" value="GOOG">
+        </label>
+    </div>
+</div>
+
+<div class="item-container">
+    <div class="item-container-header">Temperature Units</div>
+    <div class="item-container-content">
+        <label class="item">
+            Temperature Units
+            <select name="select-t" dir='rtl' class="item-select" id="temperatureUnits">
+                <option class="item-select-option" value="c">Celsius</option>
+                <option class="item-select-option" value="f" selected>Fahrenheit</option>
+            </select>
+        </label>
+    </div>
+</div>
+
+<div class='item-container'>
+    <div class='button-container'>
+        <input id='submitButton' type='button' class='item-button' value='SUBMIT'>
+    </div>
+</div>
+
+<script src='/bower_components/pebble-slate/dist/js/slate.min.js'></script>
+<script src='/js/main.js'></script>
+</body>
+</html>

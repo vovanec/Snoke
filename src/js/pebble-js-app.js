@@ -4,6 +4,10 @@ var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
 
 
+var Config = {stockSymbol: localStorage.snokeStockSybmol || 'GOOG',
+              temperatureUnits: localStorage.snokeTemperatureUnits || 'f'};
+
+
 var sendMessageWithRetries = function (msg, retryNum) {
 
     if (retryNum === undefined) {
@@ -89,9 +93,14 @@ var fetchWeather = function (latitude, longitude, callback) {
                 var respData = jsonResp.data;
 
                 var temp = Math.round(respData.temp);
-                var city = respData.city;
 
-                weatherStr = city + ', ' + temp + 'C.';
+                var tempStr = temp + 'C.';
+                if (Config.temperatureUnits === 'f') {
+                    temp = temp * 9/5 + 32;
+                    tempStr = temp + 'F.';
+                }
+
+                weatherStr = respData.city + ', ' + tempStr;
             } catch (err) {
                 console.log('Could not parse server response: ' + err);
                 return;
@@ -116,7 +125,7 @@ var getWeatherInfo = function (callback) {
             fetchWeather(coordinates.latitude, coordinates.longitude, callback);
         },
         function (err) {
-            console.log('Could not query geolocation services: ' + JSON.stringify(err));
+            console.log('Could not query geo location services: ' + JSON.stringify(err));
         },
         {'timeout': 15000, 'maximumAge': 60000, 'enableHighAccuracy': true});
 };
@@ -124,21 +133,28 @@ var getWeatherInfo = function (callback) {
 
 var getStocksInfo = function (callback) {
 
-    var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price';
-    console.log("Fetching stocks information, URL " + url);
+    if (Config.stockSymbol) {
 
-    queryWeb(url,
-        function (reqObj) {
-            //console.log('Received service response: ' + JSON.stringify(reqObj));
-            try {
-                callback(reqObj.responseText.split(',')[0]);
-            } catch (err) {
-                console.log('Could not parse server response: ' + err);
-            }
-        },
-        function (reqObj) {
-            console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
-        });
+        var stockSymbol = Config.stockSymbol.toUpperCase();
+        var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' + stockSymbol + '&f=price';
+        console.log("Fetching stocks information, URL " + url);
+
+        queryWeb(url,
+            function (reqObj) {
+                //console.log('Received service response: ' + JSON.stringify(reqObj));
+                try {
+                    var price = reqObj.responseText.split(',')[0];
+                    callback(stockSymbol + ': ' + price);
+                } catch (err) {
+                    console.log('Could not parse server response: ' + err);
+                }
+            },
+            function (reqObj) {
+                console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
+            });
+    } else {
+        console.log('Company stock symbol is not configured.');
+    }
 };
 
 
@@ -175,3 +191,34 @@ Pebble.addEventListener("ready",
         });
 
     });
+
+
+Pebble.addEventListener('showConfiguration', function() {
+    var url = 'http://efdaccb1.ngrok.io';
+    console.log('Showing configuration page: ' + url);
+
+    Pebble.openURL(url);
+});
+
+
+Pebble.addEventListener('webviewclosed', function(e) {
+
+    console.log(e.response);
+
+    if (e.response) {
+
+        var configData = JSON.parse(decodeURIComponent(e.response));
+        console.log('Configuration page returned: ' + JSON.stringify(configData));
+
+        Config.stockSymbol = configData.stockSymbol;
+        Config.temperatureUnits = configData.temperatureUnits;
+
+        getWeatherInfo(function (resp) {
+            sendMessage(0, MSG_TYPE_WEATHER, resp);
+        });
+
+        getStocksInfo(function (resp) {
+            sendMessage(0, MSG_TYPE_STOCKS, resp);
+        });
+    }
+});

@@ -12,7 +12,7 @@ enum {
 
 enum {
     MSG_TYPE_STOCKS = 0,
-    MSG_TYPE_WEATHER = 1
+    MSG_TYPE_WEATHER = 1,
 };
 
 enum {
