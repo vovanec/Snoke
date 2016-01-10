@@ -194,7 +194,7 @@ Pebble.addEventListener("ready",
 
 
 Pebble.addEventListener('showConfiguration', function() {
-    var url = 'http://efdaccb1.ngrok.io';
+    var url = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
     console.log('Showing configuration page: ' + url);
 
     Pebble.openURL(url);
