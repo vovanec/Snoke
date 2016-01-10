@@ -1,2 +1,2 @@
 # Snoke
-Snoke Watchface
+Snoke Watchface for Pebble Watch Classic

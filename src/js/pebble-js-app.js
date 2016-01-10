@@ -1,11 +1,23 @@
 
-
+var VERBOSE = true;
 var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
 
 
-var Config = {stockSymbol: localStorage.snokeStockSybmol || 'GOOG',
+var CONFIG_URL = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
+
+
+var Config = {stockSymbol: localStorage.snokeStockSymbol || 'GOOG',
               temperatureUnits: localStorage.snokeTemperatureUnits || 'f'};
+
+
+var logger = function(msg) {
+
+    if (VERBOSE) {
+        console.log(msg);
+    }
+
+};
 
 
 var sendMessageWithRetries = function (msg, retryNum) {
@@ -15,16 +27,16 @@ var sendMessageWithRetries = function (msg, retryNum) {
     }
 
     if (retryNum >= 3) {
-        console.log('Error: could not send app message to the frontend three times. Giving up.');
+        logger('Error: could not send app message to the frontend three times. Giving up.');
         return;
     }
 
     Pebble.sendAppMessage(msg,
         function (obj) {
-            //console.log('Success: ' + JSON.stringify(obj));
+            //logger('Success: ' + JSON.stringify(obj));
         },
         function (obj) {
-            console.log('Error: ' + JSON.stringify(obj));
+            logger('Error: ' + JSON.stringify(obj));
             setTimeout(function () {
                 sendMessageWithRetries(msg, retryNum + 1);
             }, 500);
@@ -38,7 +50,7 @@ var sendMessage = function (status, message_type, message) {
         'message_type': message_type,
         'message': message
     };
-    console.log('Sending message to the frontend: ' + JSON.stringify(msg));
+    logger('Sending message to the frontend: ' + JSON.stringify(msg));
 
     sendMessageWithRetries(msg);
 
@@ -76,17 +88,17 @@ var fetchWeather = function (latitude, longitude, callback) {
     var url = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather?' +
               'lat=' + latitude + '&long=' + longitude;
 
-    console.log("Fetching weather information, URL " + url);
+    logger('Fetching weather information, URL ' + url);
 
     queryWeb(url,
         function (reqObj) {
             var weatherStr;
 
-            //console.log('Weather info: ' + JSON.stringify(reqObj));
+            //logger('Weather info: ' + JSON.stringify(reqObj));
             try {
                 var jsonResp = JSON.parse(reqObj.response);
                 if (!jsonResp.success) {
-                    console.log('Unsuccessful response from server');
+                    logger('Unsuccessful response from server');
                     return;
                 }
 
@@ -102,7 +114,7 @@ var fetchWeather = function (latitude, longitude, callback) {
 
                 weatherStr = respData.city + ', ' + tempStr;
             } catch (err) {
-                console.log('Could not parse server response: ' + err);
+                logger('Could not parse server response: ' + err);
                 return;
             }
 
@@ -112,12 +124,13 @@ var fetchWeather = function (latitude, longitude, callback) {
 
         },
         function (reqObj) {
-            console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
+            logger('Error(' + reqObj.status + '): ' + reqObj.responseText);
         });
 };
 
 var getWeatherInfo = function (callback) {
-    console.log('Querying device geolocation services.');
+
+    logger('Querying device geo location services.');
 
     navigator.geolocation.getCurrentPosition(
         function (pos) {
@@ -125,7 +138,7 @@ var getWeatherInfo = function (callback) {
             fetchWeather(coordinates.latitude, coordinates.longitude, callback);
         },
         function (err) {
-            console.log('Could not query geo location services: ' + JSON.stringify(err));
+            logger('Could not query geo location services: ' + JSON.stringify(err));
         },
         {'timeout': 15000, 'maximumAge': 60000, 'enableHighAccuracy': true});
 };
@@ -136,31 +149,34 @@ var getStocksInfo = function (callback) {
     if (Config.stockSymbol) {
 
         var stockSymbol = Config.stockSymbol.toUpperCase();
-        var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' + stockSymbol + '&f=price';
-        console.log("Fetching stocks information, URL " + url);
+        var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' +
+            encodeURI(stockSymbol) + '&f=price';
+
+        logger('Fetching stocks information, URL ' + url);
 
         queryWeb(url,
             function (reqObj) {
-                //console.log('Received service response: ' + JSON.stringify(reqObj));
+                //logger('Received service response: ' + JSON.stringify(reqObj));
                 try {
                     var price = reqObj.responseText.split(',')[0];
                     callback(stockSymbol + ': ' + price);
                 } catch (err) {
-                    console.log('Could not parse server response: ' + err);
+                    logger('Could not parse server response: ' + err);
                 }
             },
             function (reqObj) {
-                console.log('Error(' + reqObj.status + '): ' + reqObj.responseText);
+                logger('Error(' + reqObj.status + '): ' + reqObj.responseText);
             });
     } else {
-        console.log('Company stock symbol is not configured.');
+        logger('Company stock symbol is not configured.');
     }
 };
 
 
-Pebble.addEventListener("appmessage",
+Pebble.addEventListener('appmessage',
+
     function (e) {
-        console.log("Received app message: " + JSON.stringify(e));
+        logger('Received app message: ' + JSON.stringify(e));
 
         var msg_type = e.payload.message_type;
 
@@ -173,14 +189,15 @@ Pebble.addEventListener("appmessage",
                 sendMessage(0, MSG_TYPE_WEATHER, resp);
             });
         } else {
-            console.log('Error: unknown message type received: ' + msg_type);
+            logger('Error: unknown message type received: ' + msg_type);
         }
     });
 
 
-Pebble.addEventListener("ready",
+Pebble.addEventListener('ready',
+
     function (e) {
-        console.log("Device backend is ready.");
+        logger('Device backend is ready.');
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
@@ -194,21 +211,19 @@ Pebble.addEventListener("ready",
 
 
 Pebble.addEventListener('showConfiguration', function() {
-    var url = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
-    console.log('Showing configuration page: ' + url);
 
-    Pebble.openURL(url);
+    logger('Showing configuration page: ' + CONFIG_URL);
+
+    Pebble.openURL(CONFIG_URL);
 });
 
 
 Pebble.addEventListener('webviewclosed', function(e) {
 
-    console.log(e.response);
-
     if (e.response) {
 
         var configData = JSON.parse(decodeURIComponent(e.response));
-        console.log('Configuration page returned: ' + JSON.stringify(configData));
+        logger('Configuration page returned: ' + JSON.stringify(configData));
 
         Config.stockSymbol = configData.stockSymbol;
         Config.temperatureUnits = configData.temperatureUnits;
