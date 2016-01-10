@@ -1,5 +1,4 @@
 
-var API_KEY = '06b39af7c6a935a503f792db5cc79de3';
 
 var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
@@ -70,8 +69,9 @@ var queryWeb = function (url, on_success, on_error) {
 
 
 var fetchWeather = function (latitude, longitude, callback) {
-    var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + latitude +
-        '&lon=' + longitude + '&units=metric&APPID=' + API_KEY;
+    var url = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather?' +
+              'lat=' + latitude + '&long=' + longitude;
+
     console.log("Fetching weather information, URL " + url);
 
     queryWeb(url,
@@ -81,10 +81,19 @@ var fetchWeather = function (latitude, longitude, callback) {
             //console.log('Weather info: ' + JSON.stringify(reqObj));
             try {
                 var jsonResp = JSON.parse(reqObj.response);
-                var temp = Math.round(jsonResp.main.temp);
-                weatherStr = temp + 'C, ' + jsonResp.weather[0].description;
+                if (!jsonResp.success) {
+                    console.log('Unsuccessful response from server');
+                    return;
+                }
+
+                var respData = jsonResp.data;
+
+                var temp = Math.round(respData.temp);
+                var city = respData.city;
+
+                weatherStr = city + ', ' + temp + 'C.';
             } catch (err) {
-                console.log('Could not parse weather server response: ' + JSON.stringify(err));
+                console.log('Could not parse server response: ' + err);
                 return;
             }
 
@@ -104,21 +113,20 @@ var getWeatherInfo = function (callback) {
     navigator.geolocation.getCurrentPosition(
         function (pos) {
             var coordinates = pos.coords;
-            //console.log('Coordinates: ' + JSON.stringify(pos));
             fetchWeather(coordinates.latitude, coordinates.longitude, callback);
         },
         function (err) {
             console.log('Could not query geolocation services: ' + JSON.stringify(err));
         },
-        {'timeout': 15000, 'maximumAge': 60000});
+        {'timeout': 15000, 'maximumAge': 60000, 'enableHighAccuracy': true});
 };
 
 
 var getStocksInfo = function (callback) {
-    
+
     var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=jnpr&f=price';
     console.log("Fetching stocks information, URL " + url);
-  
+
     queryWeb(url,
         function (reqObj) {
             //console.log('Received service response: ' + JSON.stringify(reqObj));
