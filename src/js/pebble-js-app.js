@@ -1,5 +1,5 @@
 
-var mConfig = {};
+var gConfig = {};
 
 var VERBOSE = false;
 var MSG_TYPE_STOCKS = 0;
@@ -17,29 +17,29 @@ var logger = function(msg) {
 };
 
 
-var saveLocalData = function (config) {
+var saveConfig = function (config) {
 
     localStorage.setItem('snokeStockSymbol', config.stockSymbol);
     localStorage.setItem('snokeTemperatureUnits', config.temperatureUnits);
 
-    loadLocalData();
+    loadConfig();
 };
 
 
-var loadLocalData = function () {
+var loadConfig = function () {
 
-    mConfig.snokeStockSymbol = localStorage.getItem('snokeStockSymbol');
-    mConfig.snokeTemperatureUnits = localStorage.getItem('snokeTemperatureUnits');
+    gConfig.snokeStockSymbol = localStorage.getItem('snokeStockSymbol');
+    gConfig.snokeTemperatureUnits = localStorage.getItem('snokeTemperatureUnits');
 
-    if(!mConfig.snokeStockSymbol || mConfig.snokeStockSymbol == 'undefined') {
-        mConfig.snokeStockSymbol = 'GOOG';
+    if(!gConfig.snokeStockSymbol || gConfig.snokeStockSymbol == 'undefined') {
+        gConfig.snokeStockSymbol = 'GOOG';
     }
 
-    if(!mConfig.snokeTemperatureUnits || mConfig.snokeTemperatureUnits == 'undefined') {
-        mConfig.snokeTemperatureUnits = 'f';
+    if(!gConfig.snokeTemperatureUnits || gConfig.snokeTemperatureUnits == 'undefined') {
+        gConfig.snokeTemperatureUnits = 'f';
     }
 
-    logger('Loaded local config: ' + JSON.stringify(mConfig));
+    logger('Loaded local config: ' + JSON.stringify(gConfig));
 };
 
 
@@ -130,7 +130,7 @@ var fetchWeather = function (latitude, longitude, callback) {
                 var temp = Math.round(respData.temp);
 
                 var tempStr = temp + 'C.';
-                if (mConfig.snokeTemperatureUnits === 'f') {
+                if (gConfig.snokeTemperatureUnits === 'f') {
                     temp = temp * 9/5 + 32;
                     tempStr = temp + 'F.';
                 }
@@ -169,7 +169,7 @@ var getWeatherInfo = function (callback) {
 
 var getStocksInfo = function (callback) {
 
-    var stockSymbol = mConfig.snokeStockSymbol;
+    var stockSymbol = gConfig.snokeStockSymbol;
 
     if (stockSymbol) {
 
@@ -224,7 +224,7 @@ Pebble.addEventListener('ready',
     function (e) {
         logger('Device backend is ready.');
 
-        loadLocalData();
+        loadConfig();
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
@@ -251,7 +251,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
         var configData = JSON.parse(decodeURIComponent(e.response));
         logger('Configuration data returned: ' + JSON.stringify(configData));
 
-        saveLocalData(configData);
+        saveConfig(configData);
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
