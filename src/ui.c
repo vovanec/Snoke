@@ -165,6 +165,7 @@ void set_time(struct tm *tick_time) {
 }
 
 void set_battery_percent(int battery_percent) {
+
     snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d%%", battery_percent);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
     text_layer_set_text(s_battery_percent, BATTERY_PERCENT_STR);
@@ -172,6 +173,7 @@ void set_battery_percent(int battery_percent) {
 
 
 void set_bluetooth_connected(int connected) {
+
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting bluetooth indicator to %svisible.\n", connected ? "" : "in");
     layer_set_hidden(bitmap_layer_get_layer(s_bt_layer), !connected);
 }
