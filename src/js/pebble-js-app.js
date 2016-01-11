@@ -1,4 +1,6 @@
 
+var mConfig = {};
+
 var VERBOSE = false;
 var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
@@ -7,16 +9,37 @@ var MSG_TYPE_WEATHER = 1;
 var CONFIG_URL = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
 
 
-var Config = {stockSymbol: localStorage.snokeStockSymbol || 'GOOG',
-              temperatureUnits: localStorage.snokeTemperatureUnits || 'f'};
-
-
 var logger = function(msg) {
 
     if (VERBOSE) {
         console.log(msg);
     }
+};
 
+
+var saveLocalData = function (config) {
+
+    localStorage.setItem('snokeStockSymbol', config.stockSymbol);
+    localStorage.setItem('snokeTemperatureUnits', config.temperatureUnits);
+
+    loadLocalData();
+};
+
+
+var loadLocalData = function () {
+
+    mConfig.snokeStockSymbol = localStorage.getItem('snokeStockSymbol');
+    mConfig.snokeTemperatureUnits = localStorage.getItem('snokeTemperatureUnits');
+
+    if(!mConfig.snokeStockSymbol || mConfig.snokeStockSymbol == 'undefined') {
+        mConfig.snokeStockSymbol = 'GOOG';
+    }
+
+    if(!mConfig.snokeTemperatureUnits || mConfig.snokeTemperatureUnits == 'undefined') {
+        mConfig.snokeTemperatureUnits = 'f';
+    }
+
+    logger('Loaded local config: ' + JSON.stringify(mConfig));
 };
 
 
@@ -107,7 +130,7 @@ var fetchWeather = function (latitude, longitude, callback) {
                 var temp = Math.round(respData.temp);
 
                 var tempStr = temp + 'C.';
-                if (Config.temperatureUnits === 'f') {
+                if (mConfig.snokeTemperatureUnits === 'f') {
                     temp = temp * 9/5 + 32;
                     tempStr = temp + 'F.';
                 }
@@ -146,9 +169,12 @@ var getWeatherInfo = function (callback) {
 
 var getStocksInfo = function (callback) {
 
-    if (Config.stockSymbol) {
+    var stockSymbol = mConfig.snokeStockSymbol;
 
-        var stockSymbol = Config.stockSymbol.toUpperCase();
+    if (stockSymbol) {
+
+        stockSymbol = stockSymbol.toUpperCase();
+
         var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' +
             encodeURI(stockSymbol) + '&f=price';
 
@@ -176,7 +202,7 @@ var getStocksInfo = function (callback) {
 Pebble.addEventListener('appmessage',
 
     function (e) {
-        logger('Received app message: ' + JSON.stringify(e));
+        //logger('Received app message: ' + JSON.stringify(e));
 
         var msg_type = e.payload.message_type;
 
@@ -195,9 +221,10 @@ Pebble.addEventListener('appmessage',
 
 
 Pebble.addEventListener('ready',
-
     function (e) {
         logger('Device backend is ready.');
+
+        loadLocalData();
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
@@ -221,12 +248,10 @@ Pebble.addEventListener('showConfiguration', function() {
 Pebble.addEventListener('webviewclosed', function(e) {
 
     if (e.response) {
-
         var configData = JSON.parse(decodeURIComponent(e.response));
-        logger('Configuration page returned: ' + JSON.stringify(configData));
+        logger('Configuration data returned: ' + JSON.stringify(configData));
 
-        Config.stockSymbol = configData.stockSymbol;
-        Config.temperatureUnits = configData.temperatureUnits;
+        saveLocalData(configData);
 
         getWeatherInfo(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);

@@ -118,8 +118,10 @@ static void update_battery(BatteryChargeState charge_state) {
 }
 
 static void bluetooth_connection_callback(bool connected) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Bluetooth is %s.\n", connected ? "connected" : "disconnected");
+
+    set_bluetooth_connected(connected);
 }
+
 
 void init(void) {
 
@@ -136,6 +138,7 @@ void init(void) {
     update_battery(battery_state_service_peek());
     battery_state_service_subscribe(&update_battery);
 
+    set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
 }
 

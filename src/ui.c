@@ -26,6 +26,8 @@ static TextLayer *s_time;
 static BitmapLayer *s_battery_icon;
 static TextLayer *s_battery_percent;
 static TextLayer *s_weather;
+static GBitmap *s_bt_image;
+static BitmapLayer *s_bt_layer;
 
 
 static void handle_window_load(Window *window) {
@@ -88,6 +90,15 @@ static void handle_window_load(Window *window) {
     text_layer_set_text_alignment(s_weather, GTextAlignmentCenter);
     text_layer_set_font(s_weather, s_res_gothic_14);
     layer_add_child(root_layer, (Layer *)s_weather);
+
+    // Bluetooth icon.
+    s_bt_image = gbitmap_create_with_resource(RESOURCE_ID_ICON_BLUETOOTH);
+    s_bt_layer = bitmap_layer_create((GRect) {
+        .origin = { .x = 2, .y = 2 },
+        .size = gbitmap_get_bounds(s_bt_image).size});
+    bitmap_layer_set_background_color(s_bt_layer, GColorClear);
+    bitmap_layer_set_bitmap(s_bt_layer, s_bt_image);
+    layer_add_child(root_layer, bitmap_layer_get_layer(s_bt_layer));
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");
 }
@@ -157,4 +168,10 @@ void set_battery_percent(int battery_percent) {
     snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d%%", battery_percent);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
     text_layer_set_text(s_battery_percent, BATTERY_PERCENT_STR);
+}
+
+
+void set_bluetooth_connected(int connected) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting bluetooth indicator to %svisible.\n", connected ? "" : "in");
+    layer_set_hidden(bitmap_layer_get_layer(s_bt_layer), !connected);
 }

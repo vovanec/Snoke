@@ -16,19 +16,15 @@
             {
                 "file": "images/snoke_bitmap_small.png",
                 "name": "SNOKE_BITMAP_SMALL",
-                "targetPlatforms": null,
+                "targetPlatforms": [
+                    "aplite"
+                ],
                 "type": "bitmap"
             },
             {
                 "file": "images/snoke_bitmap_icon.png",
                 "menuIcon": true,
                 "name": "SNOKE_ICON",
-                "targetPlatforms": null,
-                "type": "bitmap"
-            },
-            {
-                "file": "images/snoke_bitmap.png",
-                "name": "SNOKE_BITMAP",
                 "targetPlatforms": [
                     "aplite"
                 ],
@@ -37,13 +33,17 @@
             {
                 "file": "images/icon_battery_vert.png",
                 "name": "ICON_BATTERY_VERT",
-                "targetPlatforms": null,
+                "targetPlatforms": [
+                    "aplite"
+                ],
                 "type": "bitmap"
             },
             {
-                "file": "images/icon_battery.png",
-                "name": "ICON_BATTERY",
-                "targetPlatforms": null,
+                "file": "images/bluetooth-16.png",
+                "name": "ICON_BLUETOOTH",
+                "targetPlatforms": [
+                    "aplite"
+                ],
                 "type": "bitmap"
             }
         ]
