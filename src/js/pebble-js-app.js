@@ -25,7 +25,11 @@ var objToURLParams = function (obj) {
 
     for (var name in obj) {
         if (obj.hasOwnProperty(name)) {
-            queryParams.push(name + '=' + obj[name]);
+            var objVal = obj[name];
+            if (typeof objVal === 'string') {
+                objVal = objVal.replace(/^\s+|\s+$/g, '');
+            }
+            queryParams.push(name + '=' + objVal);
         }
     }
 

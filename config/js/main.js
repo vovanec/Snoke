@@ -39,7 +39,7 @@ var getAndStoreConfigData = function () {
 
     var $stockSymbol = $('#stockSymbol'),
         $temperatureUnits = $('#temperatureUnits'),
-        stockSymbolStr = $stockSymbol.val().toUpperCase();
+        stockSymbolStr = $stockSymbol.val().replace(/^\s+|\s+$/g, '').toUpperCase();
 
     return {
         stockSymbol: stockSymbolStr || null,
