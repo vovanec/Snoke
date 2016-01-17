@@ -19,27 +19,43 @@ var logger = function(msg) {
 
 var saveConfig = function (config) {
 
-    localStorage.setItem('snokeStockSymbol', config.stockSymbol);
-    localStorage.setItem('snokeTemperatureUnits', config.temperatureUnits);
+    localStorage.setItem('stockSymbol', config.stockSymbol);
+    localStorage.setItem('temperatureUnits', config.temperatureUnits);
 
     loadConfig();
 };
 
 
-var loadConfig = function () {
+var objToURLParams = function (obj) {
 
-    gConfig.snokeStockSymbol = localStorage.getItem('snokeStockSymbol');
-    gConfig.snokeTemperatureUnits = localStorage.getItem('snokeTemperatureUnits');
+    var queryParams = [];
 
-    if(!gConfig.snokeStockSymbol || gConfig.snokeStockSymbol == 'undefined') {
-        gConfig.snokeStockSymbol = 'GOOG';
+    for (var name in obj) {
+        if (obj.hasOwnProperty(name)) {
+            queryParams.push(name + '=' + obj[name]);
+        }
     }
 
-    if(!gConfig.snokeTemperatureUnits || gConfig.snokeTemperatureUnits == 'undefined') {
-        gConfig.snokeTemperatureUnits = 'f';
+    return queryParams.join('&');
+};
+
+
+var loadConfig = function () {
+
+    gConfig.stockSymbol = localStorage.getItem('stockSymbol');
+    gConfig.temperatureUnits = localStorage.getItem('temperatureUnits');
+
+    if(!gConfig.stockSymbol || gConfig.stockSymbol == 'undefined') {
+        gConfig.stockSymbol = 'GOOG';
+    }
+
+    if(!gConfig.temperatureUnits || gConfig.temperatureUnits == 'undefined') {
+        gConfig.temperatureUnits = 'f';
     }
 
     logger('Loaded local config: ' + JSON.stringify(gConfig));
+
+    return gConfig;
 };
 
 
@@ -130,7 +146,7 @@ var fetchWeather = function (latitude, longitude, callback) {
                 var temp = Math.round(respData.temp);
 
                 var tempStr = temp + 'C.';
-                if (gConfig.snokeTemperatureUnits === 'f') {
+                if (gConfig.temperatureUnits === 'f') {
                     temp = temp * 9/5 + 32;
                     tempStr = temp + 'F.';
                 }
@@ -154,7 +170,7 @@ var fetchWeather = function (latitude, longitude, callback) {
 var getWeatherInfo = function (callback) {
 
     logger('Querying device geo location services.');
-
+    
     navigator.geolocation.getCurrentPosition(
         function (pos) {
             var coordinates = pos.coords;
@@ -169,7 +185,7 @@ var getWeatherInfo = function (callback) {
 
 var getStocksInfo = function (callback) {
 
-    var stockSymbol = gConfig.snokeStockSymbol;
+    var stockSymbol = gConfig.stockSymbol;
 
     if (stockSymbol) {
 
@@ -239,9 +255,11 @@ Pebble.addEventListener('ready',
 
 Pebble.addEventListener('showConfiguration', function() {
 
-    logger('Showing configuration page: ' + CONFIG_URL);
+    var fullURL = CONFIG_URL + '?' + objToURLParams(loadConfig());
 
-    Pebble.openURL(CONFIG_URL);
+    logger('Showing configuration page: ' + fullURL);
+
+    Pebble.openURL(fullURL);
 });
 
 

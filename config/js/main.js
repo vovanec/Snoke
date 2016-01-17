@@ -1,4 +1,13 @@
 
+var getParameterByName = function (url, name) {
+
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(url);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
+
 var submitHandler = function () {
 
     var $submitButton = $('#submitButton');
@@ -16,34 +25,26 @@ var submitHandler = function () {
 var loadOptions = function () {
 
     var $stockSymbol = $('#stockSymbol'),
-        $temperatureUnits = $('#temperatureUnits');
+        $temperatureUnits = $('#temperatureUnits'),
+        url = document.location.href,
+        stockSymbol = getParameterByName(url, 'stockSymbol') || 'GOOG',
+        temperatureUnits = getParameterByName(url, 'temperatureUnits') || 'f';
 
-    if (localStorage.snokeStockSymbol) {
-        var stockSymbol = localStorage.snokeStockSymbol.toUpperCase();
-        $stockSymbol.val(stockSymbol);
-    }
-
-    if (localStorage.snokeTemperatureUnits) {
-        $temperatureUnits.val(localStorage.snokeTemperatureUnits);
-    }
+    $stockSymbol.val(stockSymbol.toUpperCase());
+    $temperatureUnits.val(temperatureUnits);
 };
 
 
 var getAndStoreConfigData = function () {
 
     var $stockSymbol = $('#stockSymbol'),
-        $temperatureUnits = $('#temperatureUnits');
+        $temperatureUnits = $('#temperatureUnits'),
+        stockSymbolStr = $stockSymbol.val().toUpperCase();
 
-    var stockSymbolStr = $stockSymbol.val().toUpperCase();
-    var options = {
+    return {
         stockSymbol: stockSymbolStr || null,
         temperatureUnits: $temperatureUnits.val()
     };
-
-    localStorage.snokeStockSymbol = stockSymbolStr;
-    localStorage.snokeTemperatureUnits = options.temperatureUnits;
-
-    return options;
 };
 
 
