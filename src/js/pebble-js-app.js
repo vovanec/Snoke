@@ -257,6 +257,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
         saveConfig(configData);
 
+        gCachedStockInfo.clear();
+        gCachedWeatcherInfo.clear();
+
         getWeatherInfo().then(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
         }, console.log);
