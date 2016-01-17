@@ -17,7 +17,8 @@
                 "file": "images/snoke_bitmap_small.png",
                 "name": "SNOKE_BITMAP_SMALL",
                 "targetPlatforms": [
-                    "aplite"
+                    "aplite",
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -26,7 +27,8 @@
                 "menuIcon": true,
                 "name": "SNOKE_ICON",
                 "targetPlatforms": [
-                    "aplite"
+                    "aplite",
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -34,7 +36,8 @@
                 "file": "images/icon_battery_vert.png",
                 "name": "ICON_BATTERY_VERT",
                 "targetPlatforms": [
-                    "aplite"
+                    "aplite",
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -42,7 +45,8 @@
                 "file": "images/bluetooth-16.png",
                 "name": "ICON_BLUETOOTH",
                 "targetPlatforms": [
-                    "aplite"
+                    "aplite",
+                    "basalt"
                 ],
                 "type": "bitmap"
             }
@@ -51,7 +55,8 @@
     "sdkVersion": "3",
     "shortName": "Snoke",
     "targetPlatforms": [
-        "aplite"
+        "aplite",
+        "basalt"
     ],
     "uuid": "084bae0b-867a-403d-802a-939df14b7f29",
     "versionLabel": "1.1",
