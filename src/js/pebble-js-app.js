@@ -52,30 +52,6 @@ var loadConfig = function () {
 };
 
 
-var sendMessageWithRetries = function (msg, retryNum) {
-
-    if (retryNum === undefined) {
-        retryNum = 0;
-    }
-
-    if (retryNum >= 3) {
-        logger('Error: could not send app message to the frontend three times. Giving up.');
-        return;
-    }
-
-    Pebble.sendAppMessage(msg,
-        function (obj) {
-            //logger('Success: ' + JSON.stringify(obj));
-        },
-        function (obj) {
-            logger('Error: ' + JSON.stringify(obj));
-            setTimeout(function () {
-                sendMessageWithRetries(msg, retryNum + 1);
-            }, 500);
-        });
-};
-
-
 var sendMessage = function (status, message_type, message) {
     var msg = {
         'status': status,
@@ -85,13 +61,6 @@ var sendMessage = function (status, message_type, message) {
     logger('Sending message to the frontend: ' + JSON.stringify(msg));
 
     sendMessageWithRetries(msg);
-
-    // PRO TIP: If you are sending more than one message, or a complex set of messages,
-    // it is important that you setup an ackHandler and a nackHandler and call
-    // Pebble.sendAppMessage({ /* Message here */ }, ackHandler, nackHandler), which
-    // will designate the ackHandler and nackHandler that will be called upon the Pebble
-    // ack-ing or nack-ing the message you just sent. The specified nackHandler will
-    // also be called if your message send attempt times out.
 };
 
 var queryWeb = function (url, on_success, on_error) {
@@ -117,7 +86,7 @@ var queryWeb = function (url, on_success, on_error) {
 
 
 var fetchWeather = function (latitude, longitude) {
-    
+
     var url = WEATHER_URL + '?lat=' + latitude + '&long=' + longitude;
 
     logger('Fetching weather information, URL ' + url);
@@ -166,7 +135,7 @@ var getWeatherInfo = function () {
         return p.resolve(cachedInfo);
     }
 
-    logger('Cached weather information is out of date. Querying device geo location services.');
+    logger('Querying device geo location services.');
 
     navigator.geolocation.getCurrentPosition(
         function (pos) {
@@ -203,7 +172,7 @@ var getStocksInfo = function () {
         var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' +
             encodeURI(stockSymbol) + '&f=price';
 
-        logger('Cached stock information is out of date. Fetching stocks information, URL ' + url);
+        logger('Fetching stocks information, URL ' + url);
 
         queryWeb(url,
             function (reqObj) {

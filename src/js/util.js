@@ -27,10 +27,14 @@ function Cached (key, timeout) {
                 logger('Cached information for key ' + key + ' is up to date: ' + value);
                 return value;
             } {
-                var outOfDateSec = (currentTs - (lastTs + timeout)) / 1000;
-                logger('Cached information for key ' + key + ' is out of date for ' +
-                    outOfDateSec + ' seconds');
-                this.clear();
+                if(!isNaN(lastTs)) {
+                    var outOfDateSec = (currentTs - (lastTs + timeout)) / 1000;
+                    logger('Cached information for key ' + key + ' is out of date for ' +
+                        outOfDateSec + ' seconds');
+                    this.clear();
+                } else {
+                    logger('Cached information for key ' + key + ' is out of date.');
+                }
             }
 
             return null;
@@ -47,4 +51,34 @@ function Cached (key, timeout) {
         }
     };
 
+}
+
+
+function sendMessageWithRetries (msg, maxRetries) {
+
+    maxRetries = maxRetries || 3;
+
+    var _sendWithRetries = function (retryNum) {
+
+        if (retryNum === undefined) {
+            retryNum = 0;
+        }
+
+        if (retryNum >= maxRetries) {
+            logger('Error: could not send app message to the frontend three times. Giving up.');
+            return;
+        }
+
+        Pebble.sendAppMessage(msg,
+            function (obj) {},
+            function (obj) {
+                logger('Could not send app message. Error: ' + JSON.stringify(obj));
+                setTimeout(function () {
+                    _sendWithRetries(retryNum + 1);
+                }, 1000);
+            }
+        );
+    };
+
+    _sendWithRetries();
 }
