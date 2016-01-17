@@ -23,7 +23,7 @@ static Window *s_window;
 static BitmapLayer *s_bitmap_layer;
 static TextLayer *s_stocks;
 static TextLayer *s_time;
-static BitmapLayer *s_battery_icon;
+//static BitmapLayer *s_battery_icon;
 static TextLayer *s_battery_percent;
 static TextLayer *s_weather;
 static GBitmap *s_bt_image;
@@ -69,9 +69,9 @@ static void handle_window_load(Window *window) {
     layer_add_child(root_layer, (Layer *)s_time);
 
     // s_battery_icon
-    s_battery_icon = bitmap_layer_create(GRect(107, 5, 6, 12));
-    bitmap_layer_set_background_color(s_battery_icon, GColorWhite);
-    layer_add_child(root_layer, (Layer *)s_battery_icon);
+    //s_battery_icon = bitmap_layer_create(GRect(107, 5, 6, 12));
+    //bitmap_layer_set_background_color(s_battery_icon, GColorWhite);
+    //layer_add_child(root_layer, (Layer *)s_battery_icon);
 
     // s_battery_percent
     s_battery_percent = text_layer_create(GRect(115, 2, 28, 14));
@@ -116,7 +116,7 @@ static void handle_window_unload(Window* window) {
 
     text_layer_destroy(s_time);
 
-    bitmap_layer_destroy(s_battery_icon);
+    //bitmap_layer_destroy(s_battery_icon);
     text_layer_destroy(s_battery_percent);
 
     text_layer_destroy(s_weather);
