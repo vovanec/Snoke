@@ -99,12 +99,12 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
     //APP_LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
 
-    if (tick_time->tm_min == 0) {
+    if (tick_time->tm_min % 11 == 0) {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.\n");
         query_backend(MSG_TYPE_STOCKS);
     }
 
-    if (tick_time->tm_min % 20 == 0) {
+    if (tick_time->tm_min % 6 == 0) {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for weather info update.\n");
         query_backend(MSG_TYPE_WEATHER);
     }

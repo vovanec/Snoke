@@ -1,20 +1,13 @@
 
-var gConfig = {};
-
-var VERBOSE = false;
 var MSG_TYPE_STOCKS = 0;
 var MSG_TYPE_WEATHER = 1;
 
-
 var CONFIG_URL = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
+var WEATHER_URL = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather';
 
-
-var logger = function(msg) {
-
-    if (VERBOSE) {
-        console.log(msg);
-    }
-};
+var gConfig = {};
+var gCachedStockInfo = Cached('cachedStockInfo', 60 * 60 * 1000);
+var gCachedWeatcherInfo = Cached('cachedWeatherInfo', 20 * 60 * 1000);
 
 
 var saveConfig = function (config) {
@@ -106,7 +99,7 @@ var queryWeb = function (url, on_success, on_error) {
     var req = new XMLHttpRequest();
     req.open('GET', url, true);
 
-    req.onload = function (e) {
+    req.onload = function () {
         if (req.readyState == 4) {
             if (req.status == 200) {
                 if (on_success) {
@@ -123,22 +116,22 @@ var queryWeb = function (url, on_success, on_error) {
 };
 
 
-var fetchWeather = function (latitude, longitude, callback) {
-    var url = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather?' +
-              'lat=' + latitude + '&long=' + longitude;
+var fetchWeather = function (latitude, longitude) {
+    
+    var url = WEATHER_URL + '?lat=' + latitude + '&long=' + longitude;
 
     logger('Fetching weather information, URL ' + url);
 
+    var p = new Promise();
+
     queryWeb(url,
         function (reqObj) {
-            var weatherStr;
 
             //logger('Weather info: ' + JSON.stringify(reqObj));
             try {
                 var jsonResp = JSON.parse(reqObj.response);
                 if (!jsonResp.success) {
-                    logger('Unsuccessful response from server');
-                    return;
+                    return p.reject('Error: unsuccessful response from server');
                 }
 
                 var respData = jsonResp.data;
@@ -151,106 +144,130 @@ var fetchWeather = function (latitude, longitude, callback) {
                     tempStr = temp + 'F.';
                 }
 
-                weatherStr = respData.city + ', ' + tempStr;
+                p.resolve(respData.city + ', ' + tempStr);
             } catch (err) {
-                logger('Could not parse server response: ' + err);
-                return;
+                p.reject('Error - could not parse server response: ' + err);
             }
-
-            if (callback) {
-                callback(weatherStr);
-            }
-
         },
         function (reqObj) {
-            logger('Error(' + reqObj.status + '): ' + reqObj.responseText);
+            p.reject('Error(' + reqObj.status + '): ' + reqObj.responseText);
         });
+
+    return p;
 };
 
-var getWeatherInfo = function (callback) {
 
-    logger('Querying device geo location services.');
-    
+var getWeatherInfo = function () {
+
+    var p = new Promise();
+
+    var cachedInfo = gCachedWeatcherInfo.get();
+    if (cachedInfo) {
+        return p.resolve(cachedInfo);
+    }
+
+    logger('Cached weather information is out of date. Querying device geo location services.');
+
     navigator.geolocation.getCurrentPosition(
         function (pos) {
             var coordinates = pos.coords;
-            fetchWeather(coordinates.latitude, coordinates.longitude, callback);
+            fetchWeather(coordinates.latitude, coordinates.longitude).then(
+                function (weatherStr) {
+                    gCachedWeatcherInfo.set(weatherStr);
+                    p.resolve(weatherStr);
+                }, console.log);
         },
         function (err) {
-            logger('Could not query geo location services: ' + JSON.stringify(err));
+            p.reject('Could not query geo location services: ' + JSON.stringify(err));
         },
         {'timeout': 15000, 'maximumAge': 60000, 'enableHighAccuracy': true});
+
+    return p;
 };
 
 
-var getStocksInfo = function (callback) {
+var getStocksInfo = function () {
+
+    var p = new Promise();
 
     var stockSymbol = gConfig.stockSymbol;
 
     if (stockSymbol) {
 
-        stockSymbol = stockSymbol.toUpperCase();
+        var cachedInfo = gCachedStockInfo.get();
+        if (cachedInfo) {
+            return p.resolve(cachedInfo);
+        }
 
+        stockSymbol = stockSymbol.toUpperCase();
         var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' +
             encodeURI(stockSymbol) + '&f=price';
 
-        logger('Fetching stocks information, URL ' + url);
+        logger('Cached stock information is out of date. Fetching stocks information, URL ' + url);
 
         queryWeb(url,
             function (reqObj) {
                 //logger('Received service response: ' + JSON.stringify(reqObj));
                 try {
                     var price = reqObj.responseText.split(',')[0];
-                    callback(stockSymbol + ': ' + price);
+                    var stockInfo = stockSymbol + ': ' + price;
+                    gCachedStockInfo.set(stockInfo);
+
+                    p.resolve(stockInfo);
                 } catch (err) {
-                    logger('Could not parse server response: ' + err);
+                    p.reject('Error - Could not parse server response: ' + err);
                 }
             },
             function (reqObj) {
-                logger('Error(' + reqObj.status + '): ' + reqObj.responseText);
+                p.reject('Error(' + reqObj.status + '): ' + reqObj.responseText);
             });
     } else {
         logger('Company stock symbol is not configured.');
+
+        p.resolve(null);
     }
+
+    return p;
 };
 
 
-Pebble.addEventListener('appmessage',
+Pebble.addEventListener('appmessage', function (e) {
 
-    function (e) {
         //logger('Received app message: ' + JSON.stringify(e));
 
         var msg_type = e.payload.message_type;
 
         if (msg_type === MSG_TYPE_STOCKS) {
-            getStocksInfo(function (resp) {
-                sendMessage(0, MSG_TYPE_STOCKS, resp);
-            });
+            getStocksInfo().then(
+                function (resp) {
+                    if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
+                }, console.log);
         } else if (msg_type === MSG_TYPE_WEATHER) {
-            getWeatherInfo(function (resp) {
+            getWeatherInfo().then(function (resp) {
                 sendMessage(0, MSG_TYPE_WEATHER, resp);
-            });
+            }, console.log);
         } else {
             logger('Error: unknown message type received: ' + msg_type);
         }
     });
 
 
-Pebble.addEventListener('ready',
-    function (e) {
-        logger('Device backend is ready.');
+Pebble.addEventListener('ready', function () {
 
-        loadConfig();
+    logger('Device backend is ready.');
 
-        getWeatherInfo(function (resp) {
-            sendMessage(0, MSG_TYPE_WEATHER, resp);
-        });
+    loadConfig();
 
-        getStocksInfo(function (resp) {
-            sendMessage(0, MSG_TYPE_STOCKS, resp);
-        });
+    getWeatherInfo().then(function (resp) {
+        sendMessage(0, MSG_TYPE_WEATHER, resp);
+    }, console.log);
 
-    });
+    getStocksInfo().then(
+        function (resp) {
+            if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
+        }, console.log);
+
+});
 
 
 Pebble.addEventListener('showConfiguration', function() {
@@ -271,12 +288,13 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
         saveConfig(configData);
 
-        getWeatherInfo(function (resp) {
+        getWeatherInfo().then(function (resp) {
             sendMessage(0, MSG_TYPE_WEATHER, resp);
-        });
+        }, console.log);
 
-        getStocksInfo(function (resp) {
-            sendMessage(0, MSG_TYPE_STOCKS, resp);
-        });
+        getStocksInfo().then(
+            function (resp) {
+                if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
+            }, console.log);
     }
 });
