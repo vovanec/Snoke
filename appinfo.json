@@ -14,8 +14,8 @@
     "resources": {
         "media": [
             {
-                "file": "images/snoke_bitmap_small.png",
-                "name": "SNOKE_BITMAP_SMALL",
+                "file": "images/snoke_wide_bitmap.png",
+                "name": "SNOKE_BITMAP_WIDE",
                 "targetPlatforms": [
                     "aplite",
                     "basalt"
@@ -23,8 +23,8 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/snoke_wide_bitmap.png",
-                "name": "SNOKE_BITMAP_WIDE",
+                "file": "images/snoke_bitmap_small.png",
+                "name": "SNOKE_BITMAP_SMALL",
                 "targetPlatforms": [
                     "aplite",
                     "basalt"
