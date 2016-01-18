@@ -3,7 +3,7 @@
  */
 
 
-var VERBOSE = false;
+var VERBOSE = true;
 
 function logger (msg) {
 
@@ -81,4 +81,27 @@ function sendMessageWithRetries (msg, maxRetries) {
     };
 
     _sendWithRetries();
+}
+
+
+function getURL (url) {
+
+    var p = new Promise();
+
+    var req = new XMLHttpRequest();
+    req.open('GET', url, true);
+
+    req.onload = function () {
+        if (req.readyState == 4) {
+            if (req.status == 200) {
+                p.resolve(req);
+            } else {
+                p.reject(req);
+            }
+        }
+    };
+
+    req.send(null);
+
+    return p;
 }

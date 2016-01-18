@@ -127,6 +127,12 @@ static void bluetooth_connection_callback(bool connected) {
 }
 
 
+static void tap_handler(AccelAxisType axis, int32_t direction)
+{
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "TAP HANDLER");
+}
+
+
 void init(void) {
 
     show_ui();
@@ -144,6 +150,10 @@ void init(void) {
 
     set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
+
+    // Sample as little as often to save battery and no need for precision
+    accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
+    accel_tap_service_subscribe(tap_handler);
 }
 
 void deinit(void) {
@@ -152,6 +162,8 @@ void deinit(void) {
     tick_timer_service_unsubscribe();
     battery_state_service_unsubscribe();
     bluetooth_connection_service_unsubscribe();
+
+    accel_tap_service_unsubscribe();
 
     hide_ui();
 }

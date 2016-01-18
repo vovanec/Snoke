@@ -21,6 +21,7 @@ Promise.prototype = {
     then: function (onResolve, onReject) {
         // capture calls to then()
         this._thens.push({ resolve: onResolve, reject: onReject });
+        return this;
     },
 
     // Some promise implementations also have a cancel() front end API that
@@ -33,14 +34,20 @@ Promise.prototype = {
     // is resolved (duh). The resolved value (if any) is passed by the resolver
     // to this method. All waiting onResolve callbacks are called
     // and any future ones are, too, each being passed the resolved value.
-    resolve: function (val) { this._complete('resolve', val); return this;},
+    resolve: function (val) {
+        this._complete('resolve', val);
+        return this;
+    },
 
     // reject(exception): The reject() method is called when a promise cannot
     // be resolved. Typically, you'd pass an exception as the single parameter,
     // but any other argument, including none at all, is acceptable.
     // All waiting and all future onReject callbacks are called when reject()
     // is called and are passed the exception parameter.
-    reject: function (ex) { this._complete('reject', ex); return this;},
+    reject: function (ex) {
+        this._complete('reject', ex);
+        return this;
+    },
 
     // Some promises may have a progress handler. The back end API to signal a
     // progress "event" has a single parameter. The contents of this parameter
@@ -52,14 +59,20 @@ Promise.prototype = {
     _complete: function (which, arg) {
         // switch over to sync then()
         this.then = which === 'resolve' ?
-            function (resolve, reject) { resolve && resolve(arg); } :
-            function (resolve, reject) { reject && reject(arg); };
+            function (resolve, reject) {resolve && resolve(arg);} :
+            function (resolve, reject) {reject && reject(arg);};
+
         // disallow multiple calls to resolve or reject
-        this.resolve = this.reject =
-            function () { throw new Error('Promise already completed.'); };
+        this.resolve = this.reject = function () {
+            throw new Error('Promise already completed.');
+        };
+
         // complete all waiting (async) then()s
         var aThen, i = 0;
-        while (aThen = this._thens[i++]) { aThen[which] && aThen[which](arg); }
+        while (aThen = this._thens[i++]) {
+            aThen[which] && aThen[which](arg);
+        }
+
         delete this._thens;
     }
 

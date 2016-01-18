@@ -67,27 +67,6 @@ var sendMessage = function (status, message_type, message) {
     sendMessageWithRetries(msg);
 };
 
-var queryWeb = function (url, on_success, on_error) {
-
-    var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-
-    req.onload = function () {
-        if (req.readyState == 4) {
-            if (req.status == 200) {
-                if (on_success) {
-                    on_success(req);
-                }
-            } else {
-                if (on_error) {
-                    on_error(req);
-                }
-            }
-        }
-    };
-    req.send(null);
-};
-
 
 var fetchWeather = function (latitude, longitude) {
 
@@ -97,7 +76,7 @@ var fetchWeather = function (latitude, longitude) {
 
     var p = new Promise();
 
-    queryWeb(url,
+    getURL(url).then(
         function (reqObj) {
 
             //logger('Weather info: ' + JSON.stringify(reqObj));
@@ -178,7 +157,7 @@ var getStocksInfo = function () {
 
         logger('Fetching stocks information, URL ' + url);
 
-        queryWeb(url,
+        getURL(url).then(
             function (reqObj) {
                 //logger('Received service response: ' + JSON.stringify(reqObj));
                 try {
