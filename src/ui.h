@@ -7,3 +7,4 @@ void set_time(struct tm *tick_time);
 void set_battery_percent(int battery_percent);
 void set_weather_info(char* weather);
 void set_bluetooth_connected(int connected);
+void toggle_main_window_visibility();

@@ -130,6 +130,8 @@ static void bluetooth_connection_callback(bool connected) {
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "TAP HANDLER");
+
+    toggle_main_window_visibility();
 }
 
 

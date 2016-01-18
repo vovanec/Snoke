@@ -4,7 +4,6 @@
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 // END AUTO-GENERATED UI CODE
 
-static GBitmap* s_snoke_bitmap;
 //static GBitmap* s_battery_icon_bitmap;
 
 #define TIME_STR_SIZE 16
@@ -21,6 +20,8 @@ static char WEATHER_STR[WEATHER_SIZE];
 
 static Window *s_window;
 static BitmapLayer *s_bitmap_layer;
+static GBitmap* s_snoke_bitmap;
+
 static TextLayer *s_stocks;
 static TextLayer *s_time;
 static BitmapLayer *s_battery_icon;
@@ -29,25 +30,23 @@ static TextLayer *s_weather;
 static GBitmap *s_bt_image;
 static BitmapLayer *s_bt_layer;
 
+bool mw_hidden = false;
+
 
 static void handle_window_load(Window *window) {
 
     window_set_background_color(window, GColorBlack);
 
-#ifndef PBL_SDK_3
-    window_set_fullscreen(window, true);
-#endif
-
-    GFont s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+    GFont s_res_gothic_14 = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
     GFont s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);
-    GFont s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
-    GFont s_res_gothic_28 = fonts_get_system_font(FONT_KEY_GOTHIC_28);
+    GFont s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+    GFont s_res_gothic_28 = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
 
     Layer* root_layer = window_get_root_layer(window);
 
     // s_bitmaplayer
-    s_bitmap_layer = bitmap_layer_create(GRect(0, 0, 113, 127));
-    s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_SMALL);
+    s_bitmap_layer = bitmap_layer_create(GRect(0, 30, 144, 95));
+    s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_WIDE);
     bitmap_layer_set_bitmap(s_bitmap_layer, s_snoke_bitmap);
     layer_add_child(root_layer, (Layer*)s_bitmap_layer);
 
@@ -176,4 +175,12 @@ void set_bluetooth_connected(int connected) {
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting bluetooth indicator to %svisible.\n", connected ? "" : "in");
     layer_set_hidden(bitmap_layer_get_layer(s_bt_layer), !connected);
+}
+
+
+void toggle_main_window_visibility() {
+
+    mw_hidden = !mw_hidden;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting main window layer %svisible.\n", mw_hidden ? "in" : "");
+    layer_set_hidden((Layer*)s_bitmap_layer, mw_hidden);
 }

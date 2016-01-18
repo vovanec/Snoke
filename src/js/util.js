@@ -3,7 +3,7 @@
  */
 
 
-var VERBOSE = true;
+var VERBOSE = false;
 
 function logger (msg) {
 
