@@ -19,8 +19,11 @@ static char STOCK_PRICE_STR[STOCK_PRICE_SIZE];
 static char WEATHER_STR[WEATHER_SIZE];
 
 static Window *s_window;
+
 static BitmapLayer *s_bitmap_layer;
 static GBitmap* s_snoke_bitmap;
+static BitmapLayer *s_bitmap_layer2;
+static GBitmap* s_snoke_bitmap2;
 
 static TextLayer *s_stocks;
 static TextLayer *s_time;
@@ -30,7 +33,7 @@ static TextLayer *s_weather;
 static GBitmap *s_bt_image;
 static BitmapLayer *s_bt_layer;
 
-bool mw_hidden = false;
+bool bitmap_flag = false;
 
 
 static void handle_window_load(Window *window) {
@@ -45,10 +48,16 @@ static void handle_window_load(Window *window) {
     Layer* root_layer = window_get_root_layer(window);
 
     // s_bitmaplayer
-    s_bitmap_layer = bitmap_layer_create(GRect(0, 30, 144, 95));
+    s_bitmap_layer = bitmap_layer_create(GRect(0, 26, 144, 100));
     s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_WIDE);
     bitmap_layer_set_bitmap(s_bitmap_layer, s_snoke_bitmap);
     layer_add_child(root_layer, (Layer*)s_bitmap_layer);
+
+    s_bitmap_layer2 = bitmap_layer_create(GRect(0, 0, 113, 127));
+    s_snoke_bitmap2 = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_SMALL);
+    bitmap_layer_set_bitmap(s_bitmap_layer2, s_snoke_bitmap2);
+    layer_set_hidden((Layer*)s_bitmap_layer2, true);
+    layer_add_child(root_layer, (Layer*)s_bitmap_layer2);
 
     // s_stocks
     s_stocks = text_layer_create(GRect(59, 147, 80, 20));
@@ -178,9 +187,12 @@ void set_bluetooth_connected(int connected) {
 }
 
 
-void toggle_main_window_visibility() {
+void switch_bitmaps() {
 
-    mw_hidden = !mw_hidden;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting main window layer %svisible.\n", mw_hidden ? "in" : "");
-    layer_set_hidden((Layer*)s_bitmap_layer, mw_hidden);
+    bitmap_flag = !bitmap_flag;
+
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Switching bitmaps.");
+
+    layer_set_hidden((Layer*)s_bitmap_layer, !bitmap_flag);
+    layer_set_hidden((Layer*)s_bitmap_layer2, bitmap_flag);
 }

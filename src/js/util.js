@@ -3,7 +3,7 @@
  */
 
 
-var VERBOSE = false;
+var VERBOSE = true;
 
 function logger (msg) {
 
@@ -18,6 +18,7 @@ function Cached (key, timeout) {
     var tsKey = key + 'Ts';
 
     return {
+
         get: function () {
             var lastTs = parseInt(localStorage.getItem(tsKey)),
                 currentTs = new Date().getTime();

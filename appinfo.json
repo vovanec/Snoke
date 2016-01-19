@@ -14,7 +14,7 @@
     "resources": {
         "media": [
             {
-                "file": "images/snoke_wide_bitmap.png",
+                "file": "images/snoke_wide_144_100_bitmap.png",
                 "name": "SNOKE_BITMAP_WIDE",
                 "targetPlatforms": [
                     "aplite",

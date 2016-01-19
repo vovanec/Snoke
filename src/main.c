@@ -2,6 +2,8 @@
 
 #include "ui.h"
 
+#define MSG_SIZE 128
+
 
 // Key values for AppMessage Dictionary
 enum {
@@ -129,9 +131,9 @@ static void bluetooth_connection_callback(bool connected) {
 
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "TAP HANDLER");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Tap event. Axis type: %d, direction: %d\n", (int)axis, (int)direction);
 
-    toggle_main_window_visibility();
+    switch_bitmaps();
 }
 
 
@@ -143,7 +145,9 @@ void init(void) {
     app_message_register_inbox_dropped(in_dropped_handler);
     app_message_register_outbox_failed(out_failed_handler);
 
-    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "Inbox maximum: %d\n", (int)app_message_inbox_size_maximum());
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "Outbox maximum: %d\n", (int)app_message_outbox_size_maximum());
+    app_message_open(MSG_SIZE, MSG_SIZE);
 
     tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
 

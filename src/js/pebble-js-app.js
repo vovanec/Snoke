@@ -7,7 +7,7 @@ var WEATHER_URL = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/w
 
 var gConfig = {};
 var gCachedStockInfo = Cached('cachedStockInfo', 60 * 60 * 1000);
-var gCachedWeatcherInfo = Cached('cachedWeatherInfo', 20 * 60 * 1000);
+var gCachedWeatcherInfo = Cached('cachedWeatherInfo', 10 * 60 * 1000);
 
 
 var saveConfig = function (config) {
