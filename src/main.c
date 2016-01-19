@@ -112,6 +112,7 @@ static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     }
 
     set_time(tick_time);
+    set_date(tick_time);
 }
 
 static void update_battery(BatteryChargeState charge_state) {

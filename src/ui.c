@@ -9,6 +9,9 @@
 #define TIME_STR_SIZE 16
 static char TIME_STR[TIME_STR_SIZE];
 
+#define DATE_STR_SIZE 16
+static char DATE_STR[DATE_STR_SIZE];
+
 #define BATTERY_PERCENT_SIZE 5
 static char BATTERY_PERCENT_STR[BATTERY_PERCENT_SIZE];
 
@@ -27,11 +30,15 @@ static GBitmap* s_snoke_bitmap2;
 
 static TextLayer *s_stocks;
 static TextLayer *s_time;
+static TextLayer *s_date;
 static BitmapLayer *s_battery_icon;
 static TextLayer *s_battery_percent;
 static TextLayer *s_weather;
 static GBitmap *s_bt_image;
 static BitmapLayer *s_bt_layer;
+
+static BitmapLayer *s_weather_icon_layer;
+static GBitmap *s_weather_icon;
 
 bool bitmap_flag = false;
 
@@ -76,6 +83,26 @@ static void handle_window_load(Window *window) {
     text_layer_set_font(s_time, s_res_gothic_28);
     layer_add_child(root_layer, (Layer *)s_time);
 
+    // s_date
+    s_date = text_layer_create(GRect(20, 2, 80, 16));
+    text_layer_set_background_color(s_date, GColorClear);
+    text_layer_set_text_color(s_date, GColorWhite);
+    text_layer_set_text_alignment(s_date, GTextAlignmentCenter);
+    text_layer_set_text(s_date, "");
+    text_layer_set_font(s_date, s_res_gothic_14);
+    layer_add_child(root_layer, (Layer *)s_date);
+
+    // s_weather_icon
+    /*
+    s_weather_icon = gbitmap_create_with_resource(RESOURCE_ID_W01D);
+    s_weather_icon_layer = bitmap_layer_create((GRect) {
+        .origin = { .x = 60, .y = 1 },
+        .size = gbitmap_get_bounds(s_weather_icon).size});
+    bitmap_layer_set_background_color(s_weather_icon_layer, GColorClear);
+    bitmap_layer_set_bitmap(s_weather_icon_layer, s_weather_icon);
+    layer_add_child(root_layer, bitmap_layer_get_layer(s_weather_icon_layer));
+    */
+
     // s_battery_icon
     s_battery_icon = bitmap_layer_create(GRect(108, 7, 4, 10));
     bitmap_layer_set_background_color(s_battery_icon, GColorWhite);
@@ -105,6 +132,7 @@ static void handle_window_load(Window *window) {
         .origin = { .x = 2, .y = 2 },
         .size = gbitmap_get_bounds(s_bt_image).size});
     bitmap_layer_set_background_color(s_bt_layer, GColorClear);
+    bitmap_layer_set_compositing_mode(s_bt_layer, GCompOpSet);
     bitmap_layer_set_bitmap(s_bt_layer, s_bt_image);
     layer_add_child(root_layer, bitmap_layer_get_layer(s_bt_layer));
 
@@ -123,6 +151,7 @@ static void handle_window_unload(Window* window) {
     text_layer_destroy(s_stocks);
 
     text_layer_destroy(s_time);
+    text_layer_destroy(s_date);
 
     bitmap_layer_destroy(s_battery_icon);
     text_layer_destroy(s_battery_percent);
@@ -193,6 +222,15 @@ void switch_bitmaps() {
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Switching bitmaps.");
 
+    layer_set_hidden((Layer*)s_date, !bitmap_flag);
     layer_set_hidden((Layer*)s_bitmap_layer, !bitmap_flag);
     layer_set_hidden((Layer*)s_bitmap_layer2, bitmap_flag);
+}
+
+
+void set_date(struct tm *tick_time) {
+
+    strftime(DATE_STR, DATE_STR_SIZE, "%a, %b %d", tick_time);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current date to %s\n", DATE_STR);
+    text_layer_set_text(s_date, DATE_STR);
 }
