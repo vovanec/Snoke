@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "ui.h"
+#include "util.h"
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 // END AUTO-GENERATED UI CODE
@@ -37,8 +38,9 @@ static TextLayer *s_weather;
 static GBitmap *s_bt_image;
 static BitmapLayer *s_bt_layer;
 
-static BitmapLayer *s_weather_icon_layer;
-static GBitmap *s_weather_icon;
+//static BitmapLayer *s_weather_icon_layer;
+//static GBitmap *s_weather_icon;
+
 
 bool bitmap_flag = false;
 
@@ -136,12 +138,12 @@ static void handle_window_load(Window *window) {
     bitmap_layer_set_bitmap(s_bt_layer, s_bt_image);
     layer_add_child(root_layer, bitmap_layer_get_layer(s_bt_layer));
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");
+    LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");
 }
 
 static void handle_window_unload(Window* window) {
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
+    LOG(APP_LOG_LEVEL_DEBUG, "Destroying UI.\n");
 
     window_destroy(window);
 
@@ -166,7 +168,7 @@ void hide_ui(void) {
 
 void show_ui(void) {
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI.\n");
+    LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI.\n");
 
     s_window = window_create();
 
@@ -182,7 +184,7 @@ void set_stock_price(char* price_string) {
 
     strncpy(STOCK_PRICE_STR, price_string, STOCK_PRICE_SIZE);
     STOCK_PRICE_STR[STOCK_PRICE_SIZE - 1] = '\0';
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", STOCK_PRICE_STR);
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting current stock price to %s\n", STOCK_PRICE_STR);
     text_layer_set_text(s_stocks, STOCK_PRICE_STR);
 }
 
@@ -190,28 +192,28 @@ void set_weather_info(char* weather) {
 
     strncpy(WEATHER_STR, weather, WEATHER_SIZE);
     WEATHER_STR[WEATHER_SIZE - 1] = '\0';
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current weather info to %s\n", WEATHER_STR);
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting current weather info to %s\n", WEATHER_STR);
     text_layer_set_text(s_weather, WEATHER_STR);
 }
 
 void set_time(struct tm *tick_time) {
 
     strftime(TIME_STR, TIME_STR_SIZE, "%H:%M", tick_time);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current time to %s\n", TIME_STR);
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting current time to %s\n", TIME_STR);
     text_layer_set_text(s_time, TIME_STR);
 }
 
 void set_battery_percent(int battery_percent) {
 
     snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d%%", battery_percent);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
     text_layer_set_text(s_battery_percent, BATTERY_PERCENT_STR);
 }
 
 
 void set_bluetooth_connected(int connected) {
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting bluetooth indicator to %svisible.\n", connected ? "" : "in");
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting bluetooth indicator to %svisible.\n", connected ? "" : "in");
     layer_set_hidden(bitmap_layer_get_layer(s_bt_layer), !connected);
 }
 
@@ -220,7 +222,7 @@ void switch_bitmaps() {
 
     bitmap_flag = !bitmap_flag;
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Switching bitmaps.");
+    LOG(APP_LOG_LEVEL_DEBUG, "Switching bitmaps.");
 
     layer_set_hidden((Layer*)s_date, !bitmap_flag);
     layer_set_hidden((Layer*)s_bitmap_layer, !bitmap_flag);
@@ -231,6 +233,6 @@ void switch_bitmaps() {
 void set_date(struct tm *tick_time) {
 
     strftime(DATE_STR, DATE_STR_SIZE, "%a, %b %d", tick_time);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting current date to %s\n", DATE_STR);
+    LOG(APP_LOG_LEVEL_DEBUG, "Setting current date to %s\n", DATE_STR);
     text_layer_set_text(s_date, DATE_STR);
 }

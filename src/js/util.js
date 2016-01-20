@@ -24,8 +24,12 @@ function Cached (key, timeout) {
                 currentTs = new Date().getTime();
 
             if (!isNaN(lastTs) && lastTs + timeout > currentTs) {
-                var value = localStorage.getItem(key);
-                logger('Cached information for key ' + key + ' is up to date: ' + value);
+                var value = localStorage.getItem(key),
+                    valueAge = (currentTs - lastTs) / 1000;
+
+                logger('Cached information for key ' + key + ' is up to date: `' +
+                       value + '`, age: ' + valueAge +'seconds.');
+
                 return value;
             } {
                 if(!isNaN(lastTs)) {
