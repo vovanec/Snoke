@@ -83,7 +83,7 @@ var fetchWeather = function (latitude, longitude) {
             try {
                 var jsonResp = JSON.parse(reqObj.response);
                 if (!jsonResp.success) {
-                    return p.reject('Error: unsuccessful response from server');
+                    return p.reject('Error: unsuccessful response from server: ' + JSON.stringify(jsonResp));
                 }
 
                 var respData = jsonResp.data;
@@ -122,8 +122,10 @@ var getWeatherInfo = function () {
 
     navigator.geolocation.getCurrentPosition(
         function (pos) {
-            var coordinates = pos.coords;
-            fetchWeather(coordinates.latitude, coordinates.longitude).then(
+            var lat = pos.coords.latitude, //.toFixed(6),
+                lon = pos.coords.longitude; //.toFixed(6);
+
+            fetchWeather(lat, lon).then(
                 function (weatherStr) {
                     gCachedWeatcherInfo.set(weatherStr);
                     p.resolve(weatherStr);

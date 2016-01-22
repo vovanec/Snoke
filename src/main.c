@@ -163,9 +163,11 @@ void init(void) {
     set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
 
+#if defined(PBL_BW)
     // Sample as little as often to save battery and no need for precision
     accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
     accel_tap_service_subscribe(tap_handler);
+#endif
 }
 
 void deinit(void) {
@@ -175,7 +177,9 @@ void deinit(void) {
     battery_state_service_unsubscribe();
     bluetooth_connection_service_unsubscribe();
 
+#if defined(PBL_BW)
     accel_tap_service_unsubscribe();
+#endif
 
     hide_ui();
 }
