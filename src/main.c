@@ -25,41 +25,41 @@ enum {
 
 // Write message to buffer & send
 void query_backend(int message_type) {
-
+    
     DictionaryIterator *iter;
-
+    
     app_message_outbox_begin(&iter);
     dict_write_uint8(iter, STATUS_KEY, STATUS_OK);
     dict_write_uint8(iter, MESSAGE_TYPE_KEY, message_type);
     dict_write_end(iter);
-
+    
     app_message_outbox_send();
-
+    
     LOG(APP_LOG_LEVEL_DEBUG, "Message has been sent\n");
 }
 
 // Called when a message is received from PebbleKitJS
 static void in_received_handler(DictionaryIterator *received, void *context) {
-
+    
     Tuple *tuple;
     int status;
     int message_type;
     char* message;
-
+    
     tuple = dict_find(received, STATUS_KEY);
     if(!tuple) {
         LOG(APP_LOG_LEVEL_ERROR, "Could not extract status code from backend response.\n");
         return;
     }
     status = (int)tuple->value->uint32;
-
+    
     tuple = dict_find(received, MESSAGE_TYPE_KEY);
     if(!tuple) {
         LOG(APP_LOG_LEVEL_ERROR, "Could not extract message type from backend response.\n");
         return;
     }
     message_type = (int)tuple->value->uint32;
-
+    
     tuple = dict_find(received, MESSAGE_KEY);
     if(!tuple) {
         LOG(APP_LOG_LEVEL_ERROR, "Could not extract message from backend response.\n");
@@ -67,102 +67,99 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     }
     message = tuple->value->cstring;
     LOG(APP_LOG_LEVEL_DEBUG, "Received message type %d, message string: %s.\n", message_type, message);
-
+    
     if (status != STATUS_OK) {
         LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s.\n", status, message);
         return;
     }
-
+    
     switch(message_type) {
-    case MSG_TYPE_STOCKS:
-        set_stock_price(message);
-        break;
-    case MSG_TYPE_WEATHER:
-        set_weather_info(message);
-        break;
-    default:
-        LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %d.\n", message_type);
+        case MSG_TYPE_STOCKS:
+            set_stock_price(message);
+            break;
+        case MSG_TYPE_WEATHER:
+            set_weather_info(message);
+            break;
+        default:
+            LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %d.\n", message_type);
     }
 }
 
 // Called when an incoming message from PebbleKitJS is dropped
 static void in_dropped_handler(AppMessageResult reason, void *context) {
-
+    
     LOG(APP_LOG_LEVEL_ERROR, "App message dropped.\n");
 }
 
 // Called when PebbleKitJS does not acknowledge receipt of a message
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-
+    
     LOG(APP_LOG_LEVEL_ERROR, "Backend could not accept app message.\n");
 }
 
 static void out_sent_handler(DictionaryIterator *sent, void *context) {
-
+    
     LOG(APP_LOG_LEVEL_DEBUG, "App message has been successfully sent.\n");
 }
 
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
-
+    
     //LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
-
+    
     if (tick_time->tm_min % 11 == 0) {
         LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.\n");
         query_backend(MSG_TYPE_STOCKS);
     }
-
+    
     if (tick_time->tm_min % 6 == 0) {
         LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for weather info update.\n");
         query_backend(MSG_TYPE_WEATHER);
     }
-
+    
     set_time(tick_time);
     set_date(tick_time);
 }
 
 static void update_battery(BatteryChargeState charge_state) {
-
+    
     set_battery_percent(charge_state.charge_percent);
 }
 
 static void bluetooth_connection_callback(bool connected) {
-
+    
     set_bluetooth_connected(connected);
-
-    if(!connected) {
-         vibes_long_pulse();
-    }
+    vibes_long_pulse();
 }
 
 
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
     LOG(APP_LOG_LEVEL_DEBUG, "Tap event. Axis type: %d, direction: %d\n", (int)axis, (int)direction);
-
-    switch_bitmaps();
+    
+    switch_screens();
 }
 
 
 void init(void) {
-
+    
     show_ui();
-
+    
     app_message_register_inbox_received(in_received_handler);
     app_message_register_inbox_dropped(in_dropped_handler);
     app_message_register_outbox_sent(out_sent_handler);
     app_message_register_outbox_failed(out_failed_handler);
-
+    
     app_message_open(MSG_SIZE, MSG_SIZE);
-
+    
     tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
-
+    
     update_battery(battery_state_service_peek());
     battery_state_service_subscribe(&update_battery);
-
+    
     set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
-
+    
 #if defined(PBL_BW)
     // Sample as little as often to save battery and no need for precision
     accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
@@ -171,23 +168,23 @@ void init(void) {
 }
 
 void deinit(void) {
-
+    
     app_message_deregister_callbacks();
     tick_timer_service_unsubscribe();
     battery_state_service_unsubscribe();
     bluetooth_connection_service_unsubscribe();
-
+    
 #if defined(PBL_BW)
     accel_tap_service_unsubscribe();
 #endif
-
+    
     hide_ui();
 }
 
 int main(void) {
-
-    set_log_level(APP_LOG_LEVEL_WARNING);
-
+    
+    set_log_level(APP_LOG_LEVEL_DEBUG);
+    
     init();
     app_event_loop();
     deinit();
