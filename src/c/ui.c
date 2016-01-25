@@ -255,6 +255,7 @@ static void on_scroll_text_timeout(void *data) {
 typedef void(*WatchfaceWindowFunc)(void);
 
 static void show_snoke_bitmap_primary() {
+
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
     layer_set_hidden((Layer*)s_bitmap_layer2, true);
     
@@ -264,6 +265,7 @@ static void show_snoke_bitmap_primary() {
 
 
 static void show_snoke_bitmap_secondary() {
+
     layer_set_hidden((Layer*)s_bitmap_layer, true);
     layer_set_hidden((Layer*)s_date, true);
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
@@ -273,6 +275,7 @@ static void show_snoke_bitmap_secondary() {
 
 
 static void show_sith_quotes() {
+
     layer_set_hidden((Layer*)s_bitmap_layer, true);
     layer_set_hidden((Layer*)s_bitmap_layer2, true);
     
@@ -289,6 +292,7 @@ static void show_sith_quotes() {
 
 
 static const WatchfaceWindowFunc watchface_window_funcs[NUM_SCREENS] = {
+
     show_snoke_bitmap_primary,
     show_snoke_bitmap_secondary,
     show_sith_quotes
