@@ -9,7 +9,7 @@
 #include "quotes.h"
 #include <stdlib.h>
 
-const char* QUOTES[] = {
+const char* SITH_QUOTES[] = {
     "Peace is a lie.\nThere is only passion.\nThrough passion I gain strength.\nThrough strength I gain power.\nThrough power I gain victory.\nThrough victory my chains are broken.\nThe Force shall set me free.\n–The Sith Code",
     "Do you feel it? Do you feel the power of the dark side? The only real power! The only thing worth living for!",
     "Equality is a lie...a myth to appease the masses. Simply look around and you will see the lie for what it is! There are those with power, those with the strength and will to lead. And there are those meant to follow - those incapable of anything but servitude and a meager, worthless existence.",
@@ -42,4 +42,4 @@ const char* QUOTES[] = {
     "There is truth in a lie, and lies in truth!",
     "You'll know you're making real progress on the Sith path when you go from being suicidal to homicidal.\n–Darth Ravenus"};
 
-size_t NUM_OF_QUOTES = (sizeof( QUOTES ) / sizeof( QUOTES[ 0 ] ));
+size_t NUM_OF_QUOTES = (sizeof( SITH_QUOTES ) / sizeof( SITH_QUOTES[ 0 ] ));

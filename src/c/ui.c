@@ -25,6 +25,8 @@ static char STOCK_PRICE_STR[STOCK_PRICE_SIZE];
 #define WEATHER_SIZE 32
 static char WEATHER_STR[WEATHER_SIZE];
 
+#define NUM_SCREENS 3
+
 static Window *s_window;
 
 static BitmapLayer *s_bitmap_layer;
@@ -42,13 +44,13 @@ static GBitmap *s_bt_image;
 static BitmapLayer *s_bt_layer;
 ScrollTextLayer *s_scroll_text_layer;
 
+static AppTimer *s_scroll_timer;
+static size_t s_current_quote = 0;
+static int s_current_window = 0;
+
 //static BitmapLayer *s_weather_icon_layer;
 //static GBitmap *s_weather_icon;
 
-
-static AppTimer *s_timer;
-static size_t current_quote = 0;
-static int current_window = 0;
 
 
 static void handle_window_load(Window *window) {
@@ -146,14 +148,14 @@ static void handle_window_load(Window *window) {
     layer_add_child(root_layer, bitmap_layer_get_layer(s_bt_layer));
     
     s_scroll_text_layer = scroll_text_layer_create(GRect(0, 26, 144, 100));
-    scroll_text_layer_set_text(s_scroll_text_layer, QUOTES[0]);
+    scroll_text_layer_set_text(s_scroll_text_layer, SITH_QUOTES[0]);
     scroll_text_layer_set_background_color(s_scroll_text_layer, GColorBlack);
     scroll_text_layer_set_text_color(s_scroll_text_layer, GColorWhite);
     scroll_text_layer_set_system_font(s_scroll_text_layer, FONT_KEY_GOTHIC_18);
     scroll_text_layer_set_text_alignment(s_scroll_text_layer, GTextAlignmentCenter);
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
     scroll_text_layer_add_to_window(s_scroll_text_layer, window);
-    scroll_text_layer_autoscroll_start(s_scroll_text_layer, 3000, 100, 2);
+    scroll_text_layer_autoscroll_start(s_scroll_text_layer, 5000, 200, 2);
     
     
     LOG(APP_LOG_LEVEL_DEBUG, "UI Initialized.\n");
@@ -243,62 +245,69 @@ static void on_scroll_text_timeout(void *data) {
     
     LOG(APP_LOG_LEVEL_DEBUG, "Scroll view timer, will switch to the first screen.\n");
     
-    s_timer = NULL;
-    current_window = -1;
+    s_scroll_timer = NULL;
+    s_current_window = -1;
     
     switch_screens();
 }
 
 
+typedef void(*WatchfaceWindowFunc)(void);
+
+static void show_snoke_bitmap_primary() {
+    scroll_text_layer_set_hidden(s_scroll_text_layer, true);
+    layer_set_hidden((Layer*)s_bitmap_layer2, true);
+    
+    layer_set_hidden((Layer*)s_bitmap_layer, false);
+    layer_set_hidden((Layer*)s_date, false);
+}
+
+
+static void show_snoke_bitmap_secondary() {
+    layer_set_hidden((Layer*)s_bitmap_layer, true);
+    layer_set_hidden((Layer*)s_date, true);
+    scroll_text_layer_set_hidden(s_scroll_text_layer, true);
+    
+    layer_set_hidden((Layer*)s_bitmap_layer2, false);
+}
+
+
+static void show_sith_quotes() {
+    layer_set_hidden((Layer*)s_bitmap_layer, true);
+    layer_set_hidden((Layer*)s_bitmap_layer2, true);
+    
+    layer_set_hidden((Layer*)s_date, false);
+    
+    scroll_text_layer_set_text(s_scroll_text_layer, SITH_QUOTES[s_current_quote++]);
+    if(s_current_quote >= NUM_OF_QUOTES) {
+        s_current_quote = 0;
+    }
+    scroll_text_layer_set_hidden(s_scroll_text_layer, false);
+    
+    s_scroll_timer = app_timer_register(60 * 1000, on_scroll_text_timeout, NULL);
+}
+
+
+static const WatchfaceWindowFunc watchface_window_funcs[NUM_SCREENS] = {
+    show_snoke_bitmap_primary,
+    show_snoke_bitmap_secondary,
+    show_sith_quotes
+};
+
+
 void switch_screens() {
     
-    if(s_timer) {
-        app_timer_cancel(s_timer);
-        s_timer = NULL;
+    if(s_scroll_timer) {
+        app_timer_cancel(s_scroll_timer);
+        s_scroll_timer = NULL;
     }
     
-    if(++current_window > 2) {
-        current_window = 0;
+    if(++s_current_window >= NUM_SCREENS) {
+        s_current_window = 0;
     }
     
-    LOG(APP_LOG_LEVEL_DEBUG, "Switching current window to %d\n", current_window);
-    
-    switch(current_window) {
-        case 0:
-            scroll_text_layer_set_hidden(s_scroll_text_layer, true);
-            layer_set_hidden((Layer*)s_bitmap_layer2, true);
-            
-            layer_set_hidden((Layer*)s_bitmap_layer, false);
-            layer_set_hidden((Layer*)s_date, false);
-            
-            break;
-        case 1:
-            layer_set_hidden((Layer*)s_bitmap_layer, true);
-            layer_set_hidden((Layer*)s_date, true);
-            scroll_text_layer_set_hidden(s_scroll_text_layer, true);
-            
-            layer_set_hidden((Layer*)s_bitmap_layer2, false);
-            
-            break;
-        case 2:
-            layer_set_hidden((Layer*)s_bitmap_layer, true);
-            layer_set_hidden((Layer*)s_bitmap_layer2, true);
-            
-            layer_set_hidden((Layer*)s_date, false);
-            
-            //LOG(APP_LOG_LEVEL_DEBUG, QUOTES[current_quote]);
-            scroll_text_layer_set_text(s_scroll_text_layer, QUOTES[current_quote++]);
-            if(current_quote >= NUM_OF_QUOTES) {
-                current_quote = 0;
-            }
-            scroll_text_layer_set_hidden(s_scroll_text_layer, false);
-            
-            s_timer = app_timer_register(60 * 1000, on_scroll_text_timeout, NULL);
-            
-            break;
-        default:
-            LOG(APP_LOG_LEVEL_ERROR, "We should not really be here!!!\n");
-    }
+    LOG(APP_LOG_LEVEL_DEBUG, "Switching current window to %d\n", s_current_window);
+    watchface_window_funcs[s_current_window]();
 }
 
 

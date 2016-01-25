@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 
-extern const char* QUOTES[];
+extern const char* SITH_QUOTES[];
 extern size_t NUM_OF_QUOTES;
 
 #endif /* quotes_h */
