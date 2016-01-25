@@ -25,7 +25,7 @@ static char STOCK_PRICE_STR[STOCK_PRICE_SIZE];
 #define WEATHER_SIZE 32
 static char WEATHER_STR[WEATHER_SIZE];
 
-#define NUM_SCREENS 3
+#define PERSIST_CURRENT_SITH_QUOTE_KEY 0
 
 static Window *s_window;
 
@@ -45,8 +45,8 @@ static BitmapLayer *s_bt_layer;
 ScrollTextLayer *s_scroll_text_layer;
 
 static AppTimer *s_scroll_timer;
-static size_t s_current_quote = 0;
-static int s_current_window = 0;
+static uint16_t s_current_quote = 0;
+static uint8_t s_current_window = 0;
 
 //static BitmapLayer *s_weather_icon_layer;
 //static GBitmap *s_weather_icon;
@@ -185,13 +185,12 @@ static void handle_window_unload(Window* window) {
 }
 
 
-void hide_ui(void) {
-    window_stack_remove(s_window, true);
-}
-
-void show_ui(void) {
+void create_ui(void) {
     
     LOG(APP_LOG_LEVEL_DEBUG, "Initializing UI.\n");
+    
+    s_current_quote = persist_exists(PERSIST_CURRENT_SITH_QUOTE_KEY) ?
+        persist_read_int(PERSIST_CURRENT_SITH_QUOTE_KEY) : 0;
     
     s_window = window_create();
     
@@ -202,6 +201,15 @@ void show_ui(void) {
     
     window_stack_push(s_window, true);
 }
+
+
+
+void destroy_ui(void) {
+    
+    window_stack_remove(s_window, true);
+    persist_write_int(PERSIST_CURRENT_SITH_QUOTE_KEY, s_current_quote);
+}
+
 
 void set_stock_price(char* price_string) {
     
@@ -254,6 +262,7 @@ static void on_scroll_text_timeout(void *data) {
 
 typedef void(*WatchfaceWindowFunc)(void);
 
+
 static void show_snoke_bitmap_primary() {
 
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
@@ -291,10 +300,12 @@ static void show_sith_quotes() {
 }
 
 
-static const WatchfaceWindowFunc watchface_window_funcs[NUM_SCREENS] = {
+static const WatchfaceWindowFunc watchface_window_funcs[] = {
 
     show_snoke_bitmap_primary,
+#if defined(PBL_BW)
     show_snoke_bitmap_secondary,
+#endif
     show_sith_quotes
 };
 
@@ -306,7 +317,7 @@ void switch_screens() {
         s_scroll_timer = NULL;
     }
     
-    if(++s_current_window >= NUM_SCREENS) {
+    if(++s_current_window >= ARRAY_LENGTH(watchface_window_funcs)) {
         s_current_window = 0;
     }
     

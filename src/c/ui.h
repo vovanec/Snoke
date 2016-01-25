@@ -1,7 +1,7 @@
 #include <time.h>
 
-void show_ui(void);
-void hide_ui(void);
+void create_ui(void);
+void destroy_ui(void);
 void set_stock_price(char* price_string);
 void set_time(struct tm *tick_time);
 void set_date(struct tm *tick_time);

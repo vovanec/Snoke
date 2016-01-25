@@ -6,7 +6,7 @@
 
 int main(void) {
 
-    set_log_level(APP_LOG_LEVEL_DEBUG);
+    set_log_level(APP_LOG_LEVEL_WARNING);
 
     init();
     app_event_loop();

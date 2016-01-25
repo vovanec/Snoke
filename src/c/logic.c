@@ -133,7 +133,7 @@ static void bluetooth_connection_callback(bool connected) {
 }
 
 
-static void tap_handler(AccelAxisType axis, int32_t direction)
+static void on_watch_shake(AccelAxisType axis, int32_t direction)
 {
     LOG(APP_LOG_LEVEL_DEBUG, "Tap event. Axis type: %d, direction: %d\n", (int)axis, (int)direction);
     
@@ -143,7 +143,7 @@ static void tap_handler(AccelAxisType axis, int32_t direction)
 
 void init(void) {
     
-    show_ui();
+    create_ui();
     
     app_message_register_inbox_received(in_received_handler);
     app_message_register_inbox_dropped(in_dropped_handler);
@@ -160,11 +160,9 @@ void init(void) {
     set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
     
-#if defined(PBL_BW)
     // Sample as little as often to save battery and no need for precision
     accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
-    accel_tap_service_subscribe(tap_handler);
-#endif
+    accel_tap_service_subscribe(on_watch_shake);
 }
 
 void deinit(void) {
@@ -173,10 +171,7 @@ void deinit(void) {
     tick_timer_service_unsubscribe();
     battery_state_service_unsubscribe();
     bluetooth_connection_service_unsubscribe();
-    
-#if defined(PBL_BW)
     accel_tap_service_unsubscribe();
-#endif
     
-    hide_ui();
+    destroy_ui();
 }
