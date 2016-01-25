@@ -1,7 +1,7 @@
 #include <pebble.h>
 
-#include "C/logic.h"
-#include "C/util.h"
+#include "c/logic.h"
+#include "c/util.h"
 
 
 int main(void) {
