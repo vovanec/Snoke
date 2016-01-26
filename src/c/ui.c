@@ -260,7 +260,6 @@ void set_date(const struct tm *tick_time) {
 
 void set_battery_percent(int battery_percent) {
     
-    battery_percent = 10;
     snprintf(BATTERY_PERCENT_STR, BATTERY_PERCENT_SIZE, "%d%%", battery_percent);
     LOG(APP_LOG_LEVEL_DEBUG, "Setting battery percent to %s\n", BATTERY_PERCENT_STR);
     text_layer_set_text(s_battery_percent_layer, BATTERY_PERCENT_STR);
