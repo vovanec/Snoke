@@ -49,15 +49,6 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/icon_battery_vert.png",
-                "name": "ICON_BATTERY_VERT",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt"
-                ],
-                "type": "bitmap"
-            },
-            {
                 "file": "images/bluetooth-16.png",
                 "name": "ICON_BLUETOOTH",
                 "targetPlatforms": [

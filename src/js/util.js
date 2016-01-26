@@ -91,9 +91,9 @@ function sendMessageWithRetries (msg, maxRetries) {
 
 function getURL (url) {
 
-    var p = new Promise();
+    var req = new XMLHttpRequest(),
+        p = new Promise();
 
-    var req = new XMLHttpRequest();
     req.open('GET', url, true);
 
     req.onload = function () {

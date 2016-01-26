@@ -1,13 +1,10 @@
 
-var MSG_TYPE_STOCKS = 0;
-var MSG_TYPE_WEATHER = 1;
+var CONFIG_URL = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com',
+    WEATHER_URL = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather';
 
-var CONFIG_URL = 'http://vkuznet-cf-test.s3-website-us-west-2.amazonaws.com';
-var WEATHER_URL = 'https://6c3md7anye.execute-api.us-west-2.amazonaws.com/prod/weather';
-
-var gConfig = {};
-var gCachedStockInfo = Cached('cachedStockInfo', 60 * 60 * 1000);
-var gCachedWeatcherInfo = Cached('cachedWeatherInfo', 10 * 60 * 1000);
+var gConfig = {},
+    gCachedStockInfo = Cached('cachedStockInfo', 60 * 60 * 1000),
+    gCachedWeatcherInfo = Cached('cachedWeatherInfo', 10 * 60 * 1000);
 
 
 var saveConfig = function (config) {
@@ -70,27 +67,24 @@ var sendMessage = function (status, message_type, message) {
 
 var fetchWeather = function (latitude, longitude) {
 
-    var url = WEATHER_URL + '?lat=' + latitude + '&long=' + longitude;
+    var url = WEATHER_URL + '?lat=' + latitude + '&long=' + longitude,
+        p = new Promise();
 
     logger('Fetching weather information, URL ' + url);
-
-    var p = new Promise();
 
     getURL(url).then(
         function (reqObj) {
 
-            //logger('Weather info: ' + JSON.stringify(reqObj));
             try {
                 var jsonResp = JSON.parse(reqObj.response);
                 if (!jsonResp.success) {
                     return p.reject('Error: unsuccessful response from server: ' + JSON.stringify(jsonResp));
                 }
 
-                var respData = jsonResp.data;
+                var respData = jsonResp.data,
+                    temp = Math.round(respData.temp),
+                    tempStr = temp + 'C.';
 
-                var temp = Math.round(respData.temp);
-
-                var tempStr = temp + 'C.';
                 if (gConfig.temperatureUnits === 'f') {
                     temp = temp * 9/5 + 32;
                     tempStr = temp + 'F.';
@@ -111,9 +105,9 @@ var fetchWeather = function (latitude, longitude) {
 
 var getWeatherInfo = function () {
 
-    var p = new Promise();
+    var cachedInfo = gCachedWeatcherInfo.get(),
+        p = new Promise();
 
-    var cachedInfo = gCachedWeatcherInfo.get();
     if (cachedInfo) {
         return p.resolve(cachedInfo);
     }
@@ -142,9 +136,8 @@ var getWeatherInfo = function () {
 
 var getStocksInfo = function () {
 
-    var p = new Promise();
-
-    var stockSymbol = gConfig.stockSymbol;
+    var stockSymbol = gConfig.stockSymbol,
+        p = new Promise();
 
     if (stockSymbol) {
 
@@ -161,10 +154,10 @@ var getStocksInfo = function () {
 
         getURL(url).then(
             function (reqObj) {
-                //logger('Received service response: ' + JSON.stringify(reqObj));
                 try {
-                    var price = reqObj.responseText.split(',')[0];
-                    var stockInfo = stockSymbol + ': ' + price;
+                    var price = reqObj.responseText.split(',')[0],
+                        stockInfo = stockSymbol + ': ' + price;
+
                     gCachedStockInfo.set(stockInfo);
 
                     p.resolve(stockInfo);
@@ -185,25 +178,38 @@ var getStocksInfo = function () {
 };
 
 
+var apiFunctions = [getStocksInfo,   // MSG_TYPE_STOCKS = 0
+                    getWeatherInfo]; // MSG_TYPE_WEATHER = 1
+
+
+var callApi = function (apiFunc, appMsgType) {
+
+    apiFunc().then(
+        function (resp) {
+            if (resp) {
+                sendMessage(0, appMsgType, resp);
+            } else {
+                console.log('Empty reply from server.');
+            }
+        }, console.log);
+};
+
+var callAllApis = Array.prototype.forEach.bind(apiFunctions, callApi);
+
+
 Pebble.addEventListener('appmessage', function (e) {
 
-        //logger('Received app message: ' + JSON.stringify(e));
+    //logger('Received app message: ' + JSON.stringify(e));
 
-        var msg_type = e.payload.message_type;
+    var appMsgType = e.payload.message_type,
+        apiFunc = apiFunctions[appMsgType];
 
-        if (msg_type === MSG_TYPE_STOCKS) {
-            getStocksInfo().then(
-                function (resp) {
-                    if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
-                }, console.log);
-        } else if (msg_type === MSG_TYPE_WEATHER) {
-            getWeatherInfo().then(function (resp) {
-                sendMessage(0, MSG_TYPE_WEATHER, resp);
-            }, console.log);
-        } else {
-            logger('Error: unknown message type received: ' + msg_type);
-        }
-    });
+    if (apiFunc) {
+        callApi(apiFunc, appMsgType);
+    } else {
+        logger('Error: unknown message type received: ' + appMsgType);
+    }
+});
 
 
 Pebble.addEventListener('ready', function () {
@@ -212,15 +218,7 @@ Pebble.addEventListener('ready', function () {
 
     loadConfig();
 
-    getWeatherInfo().then(function (resp) {
-        sendMessage(0, MSG_TYPE_WEATHER, resp);
-    }, console.log);
-
-    getStocksInfo().then(
-        function (resp) {
-            if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
-        }, console.log);
-
+    callAllApis();
 });
 
 
@@ -245,13 +243,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
         gCachedStockInfo.clear();
         gCachedWeatcherInfo.clear();
 
-        getWeatherInfo().then(function (resp) {
-            sendMessage(0, MSG_TYPE_WEATHER, resp);
-        }, console.log);
-
-        getStocksInfo().then(
-            function (resp) {
-                if (resp) sendMessage(0, MSG_TYPE_STOCKS, resp);
-            }, console.log);
+        callAllApis();
     }
 });

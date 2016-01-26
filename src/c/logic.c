@@ -15,16 +15,26 @@ enum {
 
 enum {
     MSG_TYPE_STOCKS = 0,
-    MSG_TYPE_WEATHER = 1,
+    MSG_TYPE_WEATHER = 1
 };
+
 
 enum {
     STATUS_OK = 0,
     STATUS_ERROR = 1
 };
 
-// Write message to buffer & send
-void query_backend(int message_type) {
+
+typedef void (*AppMessageHandler) (const char*);
+
+static AppMessageHandler app_message_handlers[] = {
+
+    set_stock_price,
+    set_weather_info
+};
+
+
+void send_message(uint32_t message_type) {
     
     DictionaryIterator *iter;
     
@@ -34,31 +44,29 @@ void query_backend(int message_type) {
     dict_write_end(iter);
     
     app_message_outbox_send();
-    
-    LOG(APP_LOG_LEVEL_DEBUG, "Message has been sent\n");
 }
 
-// Called when a message is received from PebbleKitJS
-static void in_received_handler(DictionaryIterator *received, void *context) {
+
+static void on_message_received(DictionaryIterator *received, void *context) {
     
     Tuple *tuple;
-    int status;
-    int message_type;
-    char* message;
+    uint32_t message_type;
+    uint8_t status;
+    const char* message;
     
     tuple = dict_find(received, STATUS_KEY);
     if(!tuple) {
         LOG(APP_LOG_LEVEL_ERROR, "Could not extract status code from backend response.\n");
         return;
     }
-    status = (int)tuple->value->uint32;
+    status = tuple->value->uint8;
     
     tuple = dict_find(received, MESSAGE_TYPE_KEY);
     if(!tuple) {
         LOG(APP_LOG_LEVEL_ERROR, "Could not extract message type from backend response.\n");
         return;
     }
-    message_type = (int)tuple->value->uint32;
+    message_type = tuple->value->uint32;
     
     tuple = dict_find(received, MESSAGE_KEY);
     if(!tuple) {
@@ -66,65 +74,61 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
         return;
     }
     message = tuple->value->cstring;
-    LOG(APP_LOG_LEVEL_DEBUG, "Received message type %d, message string: %s.\n", message_type, message);
+    LOG(APP_LOG_LEVEL_DEBUG, "Received message type %ju, message string: %s.\n", (uintmax_t)message_type, message);
     
     if (status != STATUS_OK) {
         LOG(APP_LOG_LEVEL_ERROR, "Backend responded with status %d. Error message: %s.\n", status, message);
         return;
     }
     
-    switch(message_type) {
-        case MSG_TYPE_STOCKS:
-            set_stock_price(message);
-            break;
-        case MSG_TYPE_WEATHER:
-            set_weather_info(message);
-            break;
-        default:
-            LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %d.\n", message_type);
+    if (message_type < ARRAY_LENGTH(app_message_handlers)) {
+        app_message_handlers[message_type](message);
+    } else {
+        LOG(APP_LOG_LEVEL_ERROR, "Received unknown message type %ju.\n", (uintmax_t)message_type);
     }
 }
 
-// Called when an incoming message from PebbleKitJS is dropped
-static void in_dropped_handler(AppMessageResult reason, void *context) {
-    
-    LOG(APP_LOG_LEVEL_ERROR, "App message dropped.\n");
-}
 
-// Called when PebbleKitJS does not acknowledge receipt of a message
-static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-    
-    LOG(APP_LOG_LEVEL_ERROR, "Backend could not accept app message.\n");
-}
-
-static void out_sent_handler(DictionaryIterator *sent, void *context) {
+static void on_message_sent(DictionaryIterator *sent, void *context) {
     
     LOG(APP_LOG_LEVEL_DEBUG, "App message has been successfully sent.\n");
 }
 
 
+static void on_message_receive_failed(AppMessageResult reason, void *context) {
+    
+    LOG(APP_LOG_LEVEL_ERROR, "App message dropped, reason: %d\n", reason);
+}
+
+
+static void on_message_send_failed(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+    
+    LOG(APP_LOG_LEVEL_ERROR, "Backend could not accept app message, reason: %d\n", reason);
+}
+
+
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
     
-    //LOG(APP_LOG_LEVEL_DEBUG, "Tick received: %d:%d\n", tick_time->tm_hour, tick_time->tm_min);
-    
-    if (tick_time->tm_min % 11 == 0) {
+    if (tick_time->tm_min % 23 == 0) {
         LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for stock info update.\n");
-        query_backend(MSG_TYPE_STOCKS);
+        send_message(MSG_TYPE_STOCKS);
     }
     
-    if (tick_time->tm_min % 6 == 0) {
+    if (tick_time->tm_min % 11 == 0) {
         LOG(APP_LOG_LEVEL_DEBUG, "Querying backend for weather info update.\n");
-        query_backend(MSG_TYPE_WEATHER);
+        send_message(MSG_TYPE_WEATHER);
     }
     
     set_time(tick_time);
     set_date(tick_time);
 }
 
+
 static void update_battery(BatteryChargeState charge_state) {
     
     set_battery_percent(charge_state.charge_percent);
 }
+
 
 static void bluetooth_connection_callback(bool connected) {
     
@@ -145,10 +149,10 @@ void init(void) {
     
     create_ui();
     
-    app_message_register_inbox_received(in_received_handler);
-    app_message_register_inbox_dropped(in_dropped_handler);
-    app_message_register_outbox_sent(out_sent_handler);
-    app_message_register_outbox_failed(out_failed_handler);
+    app_message_register_inbox_received(on_message_received);
+    app_message_register_inbox_dropped(on_message_receive_failed);
+    app_message_register_outbox_sent(on_message_sent);
+    app_message_register_outbox_failed(on_message_send_failed);
     
     app_message_open(MSG_SIZE, MSG_SIZE);
     
@@ -160,10 +164,9 @@ void init(void) {
     set_bluetooth_connected(bluetooth_connection_service_peek());
     bluetooth_connection_service_subscribe(bluetooth_connection_callback);
     
-    // Sample as little as often to save battery and no need for precision
-    accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
     accel_tap_service_subscribe(on_watch_shake);
 }
+
 
 void deinit(void) {
     
