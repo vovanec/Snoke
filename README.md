@@ -1,2 +1,2 @@
 # Snoke
-Snoke Watchface for Pebble Watch Classic
+Supreme Leader Snoke Watchface for Pebble Watch Classic and Time.
