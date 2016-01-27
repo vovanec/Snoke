@@ -23,7 +23,9 @@
  THE SOFTWARE.
  */
 
-var VERBOSE = true;
+var VERBOSE = true,
+    USE_CACHE = true;
+
 
 function logger (msg) {
 
@@ -40,6 +42,11 @@ function Cached (key, timeout) {
     return {
 
         get: function () {
+
+            if(!USE_CACHE) {
+                return null;
+            }
+
             var lastTs = parseInt(localStorage.getItem(tsKey)),
                 currentTs = new Date().getTime();
 
@@ -66,11 +73,21 @@ function Cached (key, timeout) {
         },
 
         set: function (value) {
+
+            if(!USE_CACHE) {
+                return;
+            }
+
             localStorage.setItem(tsKey, new Date().getTime().toString());
             localStorage.setItem(key, value);
         },
 
         clear: function() {
+
+            if(!USE_CACHE) {
+                return;
+            }
+
             localStorage.removeItem(tsKey);
             localStorage.removeItem(key);
         }

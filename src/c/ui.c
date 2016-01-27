@@ -127,7 +127,7 @@ static void handle_window_load(Window *window) {
     layer_add_child(root_layer, (Layer *)s_date_layer);
     
     // s_battery_icon_layer
-    s_battery_icon_layer = bitmap_layer_create(GRect(110, 6, 4, 11));
+    s_battery_icon_layer = bitmap_layer_create(GRect(109, 6, 4, 11));
     bitmap_layer_set_background_color(s_battery_icon_layer, GColorWhite);
     layer_add_child(root_layer, (Layer *)s_battery_icon_layer);
     
