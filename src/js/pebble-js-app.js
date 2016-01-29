@@ -172,15 +172,16 @@ var getStocksInfo = function () {
         }
 
         stockSymbol = stockSymbol.toUpperCase();
-        var url = 'http://download.finance.yahoo.com/d/quotes.csv?s=' +
-            encodeURI(stockSymbol) + '&f=price';
+        var url = 'http://finance.yahoo.com/webservice/v1/symbols/' +
+            encodeURI(stockSymbol) + '/quote?format=json&view=detail';
 
         logger('Fetching stocks information, URL ' + url);
 
         getURL(url).then(
             function (reqObj) {
                 try {
-                    var price = reqObj.responseText.split(',')[0],
+                    var respObj = JSON.parse(reqObj.responseText),
+                        price = parseFloat(respObj.list.resources[0].resource.fields.price).toFixed(2),
                         stockInfo = stockSymbol + ': ' + price;
 
                     gCachedStockInfo.set(stockInfo);

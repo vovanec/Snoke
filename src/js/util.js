@@ -23,7 +23,7 @@
  THE SOFTWARE.
  */
 
-var VERBOSE = true,
+var VERBOSE = false,
     USE_CACHE = true;
 
 
