@@ -25,6 +25,7 @@
 
 
 #include <pebble.h>
+
 #include "ui.h"
 #include "util.h"
 #include "scroll-text-layer.h"
@@ -55,13 +56,13 @@ typedef void(*WatchfaceWindowFunc)(void);
 
 static Window *s_window;
 
-static BitmapLayer *s_snoke_bitmap_layer;
-static BitmapLayer *s_alt_snoke_bitmap_layer;
+static BitmapLayer *s_vader_bitmap_layer;
+static BitmapLayer *s_sidious_bitmap_layer;
 static BitmapLayer *s_battery_icon_layer;
 static BitmapLayer *s_bt_layer;
 
-static GBitmap *s_snoke_bitmap;
-static GBitmap *s_alt_snoke_bitmap;
+static GBitmap *s_vader_bitmap;
+static GBitmap *s_sidious_bitmap;
 static GBitmap *s_bt_bitmap;
 
 static TextLayer *s_stocks_layer;
@@ -89,16 +90,16 @@ static void handle_window_load(Window *window) {
     Layer* root_layer = window_get_root_layer(window);
     
     // s_bitmaplayer
-    s_snoke_bitmap_layer = bitmap_layer_create(GRect(0, 26, 144, 100));
-    s_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_WIDE);
-    bitmap_layer_set_bitmap(s_snoke_bitmap_layer, s_snoke_bitmap);
-    layer_add_child(root_layer, (Layer*)s_snoke_bitmap_layer);
+    s_vader_bitmap_layer = bitmap_layer_create(GRect(0, 20, 144, 108));
+    s_vader_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_VADER);
+    bitmap_layer_set_bitmap(s_vader_bitmap_layer, s_vader_bitmap);
+    layer_add_child(root_layer, (Layer*)s_vader_bitmap_layer);
     
-    s_alt_snoke_bitmap_layer = bitmap_layer_create(GRect(0, 0, 113, 127));
-    s_alt_snoke_bitmap = gbitmap_create_with_resource(RESOURCE_ID_SNOKE_BITMAP_SMALL);
-    bitmap_layer_set_bitmap(s_alt_snoke_bitmap_layer, s_alt_snoke_bitmap);
-    layer_set_hidden((Layer*)s_alt_snoke_bitmap_layer, true);
-    layer_add_child(root_layer, (Layer*)s_alt_snoke_bitmap_layer);
+    s_sidious_bitmap_layer = bitmap_layer_create(GRect(-4, 20, 144, 110));
+    s_sidious_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_SIDIOUS);
+    bitmap_layer_set_bitmap(s_sidious_bitmap_layer, s_sidious_bitmap);
+    layer_set_hidden((Layer*)s_sidious_bitmap_layer, true);
+    layer_add_child(root_layer, (Layer*)s_sidious_bitmap_layer);
     
     // s_stocks_layer
     s_stocks_layer = text_layer_create(GRect(59, 147, 80, 20));
@@ -178,11 +179,11 @@ static void handle_window_unload(Window* window) {
     
     window_destroy(window);
     
-    gbitmap_destroy(s_snoke_bitmap);
-    bitmap_layer_destroy(s_snoke_bitmap_layer);
+    gbitmap_destroy(s_vader_bitmap);
+    bitmap_layer_destroy(s_vader_bitmap_layer);
 
-    gbitmap_destroy(s_alt_snoke_bitmap);
-    bitmap_layer_destroy(s_alt_snoke_bitmap_layer);
+    gbitmap_destroy(s_sidious_bitmap);
+    bitmap_layer_destroy(s_sidious_bitmap_layer);
 
     text_layer_destroy(s_stocks_layer);
     text_layer_destroy(s_time_layer);
@@ -275,7 +276,7 @@ void set_bluetooth_connected(int connected) {
 
 static void on_scroll_text_timeout(void *data) {
     
-    LOG(APP_LOG_LEVEL_DEBUG, "Timer, switching back to the first screen.\n");
+    LOG(APP_LOG_LEVEL_DEBUG, "Timer, switching back to the previous screen.\n");
     
     s_scroll_timer = NULL;
     s_current_window = -1;
@@ -284,34 +285,28 @@ static void on_scroll_text_timeout(void *data) {
 }
 
 
-static void show_snoke_bitmap_primary() {
+static void show_vader_bitmap() {
 
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
-    layer_set_hidden((Layer*)s_alt_snoke_bitmap_layer, true);
+    layer_set_hidden((Layer*)s_sidious_bitmap_layer, true);
     
-    layer_set_hidden((Layer*)s_snoke_bitmap_layer, false);
-    layer_set_hidden((Layer*)s_date_layer, false);
+    layer_set_hidden((Layer*)s_vader_bitmap_layer, false);
 }
 
 
-static void show_snoke_bitmap_secondary() {
+static void show_sidious_bitmap() {
 
-    layer_set_hidden((Layer*)s_snoke_bitmap_layer, true);
-    layer_set_hidden((Layer*)s_date_layer, true);
+    layer_set_hidden((Layer*)s_vader_bitmap_layer, true);
     scroll_text_layer_set_hidden(s_scroll_text_layer, true);
     
-    layer_set_hidden((Layer*)s_alt_snoke_bitmap_layer, false);
-    
-    s_scroll_timer = app_timer_register(ONE_MINUTE, on_scroll_text_timeout, NULL);
+    layer_set_hidden((Layer*)s_sidious_bitmap_layer, false);
 }
 
 
 static void show_sith_quotes() {
 
-    layer_set_hidden((Layer*)s_snoke_bitmap_layer, true);
-    layer_set_hidden((Layer*)s_alt_snoke_bitmap_layer, true);
-    
-    layer_set_hidden((Layer*)s_date_layer, false);
+    layer_set_hidden((Layer*)s_vader_bitmap_layer, true);
+    layer_set_hidden((Layer*)s_sidious_bitmap_layer, true);
     
     scroll_text_layer_set_text(s_scroll_text_layer, SITH_QUOTES[s_current_quote++]);
     if(s_current_quote >= NUM_OF_QUOTES) {
@@ -325,10 +320,8 @@ static void show_sith_quotes() {
 
 static const WatchfaceWindowFunc watchface_window_funcs[] = {
 
-    show_snoke_bitmap_primary,
-#if defined(PBL_BW)
-    show_snoke_bitmap_secondary,
-#endif
+    show_vader_bitmap,
+    show_sidious_bitmap,
     show_sith_quotes
 };
 
@@ -339,7 +332,7 @@ void switch_screens() {
         app_timer_cancel(s_scroll_timer);
         s_scroll_timer = NULL;
     }
-    
+
     if(++s_current_window >= ARRAY_LENGTH(watchface_window_funcs)) {
         s_current_window = 0;
     }

@@ -59,4 +59,4 @@ def build(ctx):
 
     ctx.set_group('bundle')
     ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
-    
+

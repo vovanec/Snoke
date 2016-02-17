@@ -9,29 +9,13 @@
         "configurable"
     ],
     "companyName": "vovanec@gmail.com",
-    "longName": "Snoke Watchface",
+    "longName": "Sith Watchface",
     "projectType": "native",
     "resources": {
         "media": [
             {
-                "file": "images/snoke_wide_144_100_bitmap.png",
-                "name": "SNOKE_BITMAP_WIDE",
-                "targetPlatforms": [
-                    "aplite"
-                ],
-                "type": "bitmap"
-            },
-            {
-                "file": "images/snoke_64_144_110.png",
-                "name": "SNOKE_BITMAP_WIDE",
-                "targetPlatforms": [
-                    "basalt"
-                ],
-                "type": "bitmap"
-            },
-            {
-                "file": "images/snoke_bitmap_small.png",
-                "name": "SNOKE_BITMAP_SMALL",
+                "file": "images/darth_bw.png",
+                "name": "BITMAP_VADER",
                 "targetPlatforms": [
                     "aplite",
                     "basalt"
@@ -39,9 +23,18 @@
                 "type": "bitmap"
             },
             {
-                "file": "images/snoke_bitmap_icon.png",
+                "file": "images/sidious_bw.png",
+                "name": "BITMAP_SIDIOUS",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/darth_icon.png",
                 "menuIcon": true,
-                "name": "SNOKE_ICON",
+                "name": "SITH_ICON",
                 "targetPlatforms": [
                     "aplite",
                     "basalt"
@@ -60,13 +53,13 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "Snoke",
+    "shortName": "Sith",
     "targetPlatforms": [
         "aplite",
         "basalt"
     ],
-    "uuid": "084bae0b-867a-403d-802a-939df14b7f29",
-    "versionLabel": "2.0",
+    "uuid": "2E8AEB06-4D81-4822-BA0F-57B4D2BB119B",
+    "versionLabel": "1.0",
     "watchapp": {
         "watchface": true
     }
