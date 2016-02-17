@@ -108,11 +108,11 @@ var fetchWeather = function (latitude, longitude) {
 
                 var respData = jsonResp.data,
                     temp = Math.round(respData.temp),
-                    tempStr = temp + 'C.';
+                    tempStr = temp + 'C';
 
                 if (gConfig.temperatureUnits === 'f') {
                     temp = temp * 9/5 + 32;
-                    tempStr = temp + 'F.';
+                    tempStr = temp + 'F';
                 }
 
                 p.resolve(respData.city + ', ' + tempStr);
