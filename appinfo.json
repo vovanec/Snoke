@@ -14,11 +14,12 @@
     "resources": {
         "media": [
             {
-                "file": "images/darth_bw.png",
+                "file": "images/empire_bw.png",
                 "name": "BITMAP_VADER",
                 "targetPlatforms": [
                     "aplite",
-                    "basalt"
+                    "basalt",
+                    "diorite"
                 ],
                 "type": "bitmap"
             },
@@ -27,7 +28,8 @@
                 "name": "BITMAP_SIDIOUS",
                 "targetPlatforms": [
                     "aplite",
-                    "basalt"
+                    "basalt",
+                    "diorite"
                 ],
                 "type": "bitmap"
             },
@@ -37,7 +39,8 @@
                 "name": "SITH_ICON",
                 "targetPlatforms": [
                     "aplite",
-                    "basalt"
+                    "basalt",
+                    "diorite"
                 ],
                 "type": "bitmap"
             },
@@ -46,7 +49,8 @@
                 "name": "ICON_BLUETOOTH",
                 "targetPlatforms": [
                     "aplite",
-                    "basalt"
+                    "basalt",
+                    "diorite"
                 ],
                 "type": "bitmap"
             }
@@ -56,7 +60,8 @@
     "shortName": "Sith",
     "targetPlatforms": [
         "aplite",
-        "basalt"
+        "basalt",
+        "diorite"
     ],
     "uuid": "2E8AEB06-4D81-4822-BA0F-57B4D2BB119B",
     "versionLabel": "1.0",
